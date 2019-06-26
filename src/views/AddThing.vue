@@ -1,0 +1,222 @@
+<template>
+  <div class="container pt-3">
+    <form @submit.prevent="save">
+
+      <div class="form-group">
+        <label for="name">What is this thing?</label>
+        <input
+          type="text"
+          class="form-control"
+          id="name"
+          v-model="thing.name"
+          required
+        >
+      </div>
+
+      <div class="form-group">
+        <label>How long did you do it?</label>
+        <div class="d-flex justify-content-around">
+          <button
+            type="button"
+            class="btn"
+            :class="{ 
+              'btn-success shadow' : isSingleUse,
+              'btn-light'   : !isSingleUse,
+            }"
+            @click="isSingleUse=true"
+          >One Time</button>
+          <button
+            type="button"
+            class="btn"
+            :class="{
+              'btn-success shadow' : !isSingleUse,
+              'btn-light'   : isSingleUse,
+            }"
+            @click="isSingleUse = false"
+          >For a While</button>
+        </div>
+      </div>
+
+      <div
+        class="form-group"
+        v-if="!isSingleUse"
+      >
+        <label>Are you still using it?</label>
+        <div class="d-flex justify-content-around">
+          <button
+            type="button"
+            class="btn"
+            :class="{ 
+              'btn-success shadow' : thing.active,
+              'btn-light'   : !thing.active,
+            }"
+            @click="thing.active = true"
+          >Yes</button>
+          <button
+            type="button"
+            class="btn"
+            :class="{
+              'btn-success shadow' : !thing.active,
+              'btn-light'   : thing.active,
+            }"
+            @click="thing.active = false"
+          >No</button>
+        </div>
+      </div>
+
+      <div
+        class="form-group"
+        v-if="isSingleUse"
+      >
+        <label>When did you do it?</label>
+        <datetime
+          :bootstrap-styling="true"
+          input-class="form-control"
+          v-model="thing.dates[0].date"
+          ref="singleDate"
+          value-zone="America/Los_Angeles"
+        ></datetime>
+      </div>
+
+      <div
+        class="form-group"
+        v-if="!isSingleUse"
+      >
+        <label>When did you start?</label>
+        <datetime
+          :bootstrap-styling="true"
+          input-class="form-control"
+          v-model="thing.dates[0].start"
+          ref="startDate"
+          value-zone="America/Los_Angeles"
+          :max-datetime="thing.dates[0].end"
+        ></datetime>
+      </div>
+
+      <div
+        class="form-group"
+        v-if="!isSingleUse && !thing.active"
+      >
+        <label>When did you stop?</label>
+        <datetime
+          :bootstrap-styling="true"
+          input-class="form-control"
+          v-model="thing.dates[0].end"
+          ref="endDate"
+          value-zone="America/Los_Angeles"
+          :min-datetime="thing.dates[0].start"
+        ></datetime>
+      </div>
+
+      <div
+        class="bg-danger text-light p-3 mb-3 shadow rounded"
+        v-if="status.error"
+      >
+        {{ status.error }}
+      </div>
+
+      <div
+        class="bg-danger text-light p-3 mb-3 shadow rounded"
+        v-if="error"
+      >
+        {{ error }}
+      </div>
+
+      <div class="form-group">
+        <button
+          type="submit"
+          class="btn btn-block btn-primary shadow"
+          :class="{ disabled: status.loading }"
+        >
+          <span
+            class="oi oi-reload spinner"
+            v-if="status.loading"
+          ></span>
+          <span v-else>Save</span>
+        </button>
+      </div>
+
+    </form>
+  </div>
+</template>
+
+<script>
+export default {
+  props: {
+    status: {
+      type: Object
+    }
+  },
+
+  data() {
+    return {
+      thing: {
+        name: "",
+        active: false,
+        dates: [{
+          start: null,
+          end: null,
+          date: null
+        }],
+        since: null
+      },
+      isSingleUse: true,
+      error: ""
+    };
+  },
+
+  methods: {
+    save() {
+
+      if (this.isSingleUse && !this.thing.dates[0].date) {
+        this.error = "You need to set a date.";
+        // this.$refs['singleDate'].focus();
+        return;
+      }
+      
+      if (!this.isSingleUse && !this.thing.dates[0].start) {
+        this.error = "You need to set a start date.";
+        // this.$refs['startDate'].focus();
+        return;        
+      }
+      
+      if (!this.isSingleUse && !this.active && !this.thing.dates[0].end) {
+        this.error = "You need to set an end date.";
+        // this.$refs['endDate'].focus();
+        return;
+      }
+
+      this.$emit("addThing", this.thing);
+
+    }
+  },
+
+  watch: {
+    isSingleUse(val) {
+      if (val) {
+        this.thing.dates[0].start = null;
+        this.thing.dates[0].end = null;
+      } else {
+        this.thing.dates[0].date = null;
+      }
+    },
+
+    'thing.active'(val) {
+      if (val) {
+        this.thing.dates[0].end = null;
+        this.thing.dates[0].end = null;
+      } else {
+        this.thing.since = null;
+      }
+    },
+
+    thing: {
+      handler() {
+        this.error = '';
+      },
+      deep: true
+    }
+  }
+
+};
+</script>

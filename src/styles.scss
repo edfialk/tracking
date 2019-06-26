@@ -1,0 +1,36 @@
+@import url('https://fonts.googleapis.com/css?family=Roboto:400,700&display=swap');
+
+@import './lib/open-iconic/open-iconic-bootstrap.min';
+
+
+html {
+  height: 100%;
+}
+body {
+  min-height: 100%;
+  margin: 0;
+  font-family: 'Roboto', sans-serif;
+  background: rgb(100,161,204);
+  // background: linear-gradient(0deg, rgba(100,161,204,1) 0%, rgba(69,112,228,1) 100%);
+  background: linear-gradient(0deg, #65bfff 0%, #aae0ff 100%);
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+}
+
+.table-last-col-right td:last-child {
+  text-align: right;
+}
+
+
+.spinner {
+  animation: anim-rotate 2s infinite linear;
+}
+
+@keyframes anim-rotate {
+0% {
+  transform: rotate(0);
+}
+100% {
+  transform: rotate(360deg);
+}
+}

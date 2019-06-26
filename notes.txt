@@ -1,0 +1,7 @@
+colors
+https://visme.co/blog/website-color-schemes/
+
+datepicker
+https://amsul.ca/pickadate.js/date/
+
+apex charts can't scroll on mobile
