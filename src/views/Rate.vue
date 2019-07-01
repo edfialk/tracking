@@ -93,12 +93,6 @@ export default {
         }
     },
 
-    // filters: {
-    //     date(val) {
-    //         return new Date(val).toDateString()
-    //     }
-    // }
-
 };
 
 </script>

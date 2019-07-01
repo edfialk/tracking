@@ -1,149 +1,114 @@
 <template>
-  <div class="bg-light p-1 rounded">
-    <apexchart
-      type="area"
-      :options="chartOptions"
-      :series="series"
-    ></apexchart>
+  <div class="bg-light p-1 rounded mb-3">
+		<div id="chart"></div>
   </div>
 </template>
 
 <script>
 
-export default {
+import c3 from 'c3';
 
-	props: {
-		chartData: {
-			type: Array
-		},
-		annotations: {
-			type: Array
-		}
-	},
+export default {
+  props: {
+    chartData: {
+      type: Object
+    },
+    regions: {
+      type: Array
+    }
+  },
 
   data: function() {
     return {
-      chartOptions: {
-				line: {
-					curve: 'smooth'
-				},
-        xaxis: {
-					type: 'datetime',
-        },
-        yaxis: {
-          show: false
-				},
-        markers: {
-          size: 0,
-          style: 'full',
-				},
-				dataLabels: {
-					enabled: false
-				},
-				chart: {
-					toolbar: {
-						show: true,
-						tools: {
-							pan: true,
-							download: false,
-							zoomin: true,
-							zoomout: true,
-						},
-						autoSelected: 'pan'
-					}
-				},
-				tooltip: {
-					custom: ({series, seriesIndex, dataPointIndex, /* w */}) => {
-						return '<div class="p-2">Rating: ' + series[seriesIndex][dataPointIndex] + '</div>'
-					}
-				}
-			},
+      myRegions: [],
     };
-	},
-	
-  methods: {
+  },
 
-		getAnnotations(thing, color) {
+	mounted() {
 
-			let r = [];
+    let data = {
+      type: 'spline',
+      x: 'date',
+      columns: []
+    };
 
-			if (thing.dates && thing.dates.length > 0){
-				r = thing.dates.map(date => {
-					return this.getAnnotationObject(thing.name, date.start.toMillis(), date.end.toMillis(), color);
-				});
-			}
+    if (this.chartData.columns[0].length > 1){
+      data.columns = this.chartData.columns;
+    }
 
-			if (thing.since){
-				r.push(this.getAnnotationObject(thing.name, thing.since.toMillis(), new Date().getTime(), color));
-			}
-			
-			return r;
-
-		},
-
-		getAnnotationObject(text, start, end, color) {
-
-			return {
-				x: start,
-				x2: end,
-				borderColor: color,
-				fillColor: color,
-				opacity: 0.5,
-				label: {
-					style: {
-						fontSize: '12px',
-						color: '#fff',
-						background: '#333',
-					},
-					text,
-				}
-			};
-
-		},
-
-		generateDayWiseTimeSeries: function (baseval, count, yrange) {
-			var i = 0;
-			var series = [];
-			while (i < count) {
-				var x = baseval;
-				var y = Math.floor(Math.random() * (yrange.max - yrange.min + 1)) + yrange.min;
-
-				series.push([x, y]);
-				baseval += 86400000;
-				i++;
-			}
-
-			this.series = [{ data: series }];
-		}
-
-	},
-	
-	watch: {
-		annotations(val){
-			let options = Object.assign({}, this.chartOptions);
-
-			options.annotations = {
-				xaxis: val.reduce(
-					(acc, cur) => {
-						return acc.concat(this.getAnnotations(cur.thing, cur.color));
-					}, []
-				)
-			};
-
-			this.chartOptions = options;
-
-		},
+		this.chart = c3.generate({
+        bindto: '#chart',
+        data,
+        axis: {
+					x: {
+						type: 'timeseries',
+						tick: { 
+              count: 6,
+              format: '%m-%d'
+            }
+					}
+        },
+        zoom: {
+          enabled: true
+        },
+        // subchart: {
+        //   show: true
+        // }
+		});
 	},
 
-	computed: {
-		series() {
-			return [{
-				data: this.chartData
-			}]
-		}
-	}
+  watch: {
+    regions() {
+      this.chart.regions(this.chartRegions.regions);
+      this.chart.xgrids(this.chartRegions.lines);
+    },
+
+    chartData(val) {
+      this.chart.load(val);
+    }
+  },
+
+  computed: {
+    chartRegions() {
+      return this.regions.reduce((acc, cur) => {
+
+        if (cur.thing.since) {
+          acc.regions.push({
+            axis: 'x', start: new Date(cur.thing.since), class: cur.color
+          });
+          /* for adding line with text at beginning of regions */
+          // acc.lines.push({
+          //   value: new Date(cur.thing.since), class: cur.color, text: cur.thing.name
+          // });
+        }
+
+        if (cur.thing.dates && cur.thing.dates.length){
+          cur.thing.dates.forEach(d => {
+
+            if (d.date){
+              acc.lines.push({
+                value: new Date(d.date), class: cur.color, text: cur.thing.name
+              });
+            } else {
+              acc.regions.push({
+                axis: 'x', start: new Date(d.start), end: new Date(d.end), class: cur.color
+              });
+              /* for adding line with text at beginning of regions */
+              // acc.lines.push({
+              //   value: new Date(d.start), class: cur.color, text: cur.thing.name
+              // });
+            }
+
+          });
+
+        }
+        
+        return acc;
+
+      }, { lines: [], regions: [] });
+    }
+  }
 };
-
 </script>
 
 

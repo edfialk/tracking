@@ -65,7 +65,7 @@ export default {
 						let { date, rating } = doc.data();
 						date = date.toMillis();
             return { date, rating };
-					});
+          });
 				});
     },
 

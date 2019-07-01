@@ -11,7 +11,10 @@ export default new Router({
     {
       path: '/',
       name: 'home',
-      component: Home
+      component: Home,
+      beforeEnter(to, from, next) {
+        console.log('A', to, from, next);
+      }
     },
     {
       path: '/login',
@@ -20,7 +23,7 @@ export default new Router({
     },
     {
       path: '/thing/add',
-      name: 'thing-add',
+      name: 'add-thing',
       component: () => import(/* webpackChunkName: "thing" */ './views/AddThing.vue'),
     },
     {
@@ -38,6 +41,11 @@ export default new Router({
       path: '/kitty',
       name: 'kitty',
       component: () => import(/* webpackChunkName: "kitty" */ './views/Kitty.vue')
+    },
+    {
+      path: '/tracker/add',
+      name: 'add-tracker',
+      component: () => import(/* webpackChunkName: "tracker" */ './views/AddTracker.vue')
     }
   ]
 })

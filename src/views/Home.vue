@@ -3,13 +3,14 @@
 
       <!-- <h1 class="cover-heading">Hi Lerb.</h1> -->
 
-      <div class="my-5">
+      <div class="mb-3">
         <router-link to="/rate" class="btn btn-lg btn-primary btn-block">Rate Yoself</router-link>
         <router-link to="/thing/add" class="btn btn-lg btn-primary btn-block">Add a Thing</router-link>
         <router-link to="/photo" class="btn btn-lg btn-primary btn-block">Selfie!</router-link>
+        <router-link to="/tracker/add" class="btn btn-lg btn-primary btn-block">Track Something</router-link>
       </div>
 
-      <Chart :chartData="chartData" :annotations="activeThings"></Chart>
+      <Chart :chartData="chartData" :regions="selectedThings"></Chart>
 
       <Things :things="things" @toggleThing="toggleThing"></Things>
     </div>
@@ -37,7 +38,7 @@ export default {
 
   data() {
     return {
-      activeThings: [],
+      selectedThings: [],
     };
   },
 
@@ -49,16 +50,14 @@ export default {
 
     toggleThing(thing, color){
 
-      let i = this.activeThings.findIndex(e => {
-        return e.thing.id === thing.id;
-      });
+      let i = this.selectedThings.findIndex(e => e.thing.id === thing.id);
 
       if (i >= 0){
-        this.activeThings.splice(i, 1);
+        this.selectedThings.splice(i, 1);
         return;
       }
 
-      this.activeThings.push({ thing, color });
+      this.selectedThings.push({ thing, color });
     }
 
   },
@@ -67,9 +66,17 @@ export default {
 
     chartData() {
 
-      return this.ratings.map(rating => {
-        return { x: rating.date, y: rating.rating };
+      let x = ['date'];
+      let y = ['rating'];
+
+      this.ratings.forEach(rating => {
+        x.push(new Date(rating.date));
+        y.push(rating.rating);
       });
+
+      return {
+        columns: [ x, y ]
+      };
 
     }
 

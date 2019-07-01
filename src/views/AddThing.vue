@@ -1,5 +1,6 @@
 <template>
   <div class="container pt-3">
+
     <form @submit.prevent="save">
 
       <div class="form-group">
@@ -135,7 +136,6 @@
           <span v-else>Save</span>
         </button>
       </div>
-
     </form>
   </div>
 </template>
@@ -150,6 +150,7 @@ export default {
 
   data() {
     return {
+      isSingleUse: true,
       thing: {
         name: "",
         active: false,
@@ -160,7 +161,6 @@ export default {
         }],
         since: null
       },
-      isSingleUse: true,
       error: ""
     };
   },

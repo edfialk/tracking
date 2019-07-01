@@ -1,6 +1,6 @@
 <template>
 
-  <div class="box my-5 box border rounded bg-light">
+  <div class="box mb-3 box border rounded bg-light">
     <div class="p-3 text-center">
       <h5 class="mb-0">Active Things</h5>
     </div>
@@ -27,9 +27,8 @@
         <tr
           v-for="thing in inactiveThings"
           v-bind:key="thing.id"
-          @click="onRowClick(thing, $event)"
         >
-          <td>{{ thing.name }}</td>
+          <td @click="onClickThing(thing, $event)">{{ thing.name }}</td>
           <td>
             <router-link :to="'/thing/' + thing.id">
               <span class="oi oi-chevron-right text-muted"></span>
@@ -52,31 +51,30 @@ export default {
 	
 	data() {
 		return {
-			colors: [
-				'#E7717D', '#C2CAD0', '#C2B9B0', '#7E685A', '#AFD275'
-			],
+      selectedThings: []
 		};
 	},
 
   methods: {
-    onRowClick(thing, $event) {
-			let color;
-			let tr = $event.target.parentElement;
-			tr.classList.toggle('active');
+    onClickThing(thing, event) {
+			let tr = event.target.parentElement;
+      let color;
 
+      if (!tr.classList.contains('active')){
+        color = this.getNextColorClass();
+        tr.classList.add('active', color);
+        this.selectedThings.push({ tr, thing, color });
+      } else {
+        let t = this.selectedThings.find(e => e.thing.id === thing.id);
+        tr.classList.remove('active', t.color);
+        this.selectedThings = this.selectedThings.filter(e => e.thing.id !== thing.id);
+      }
 
-			if (tr.classList.contains('active')){
-				let colorIndex = Math.floor(Math.random() * this.colors.length);
-				color = this.colors[colorIndex];
-				this.colors.splice(colorIndex, 1);
-				tr.style.backgroundColor = color;
-			}else{
-				color = tr.style.backgroundColor;
-				tr.style.backgroundColor = "inherit";
-				this.colors.push(color);
-			}
-			
-			this.$emit("toggleThing", thing, color);
+      this.$emit('toggleThing', thing, color);
+    },
+
+    getNextColorClass() {
+      return 'region-color--' + this.selectedThings.length;
     }
   },
 
@@ -98,8 +96,3 @@ export default {
 };
 </script>
 
-<style scoped>
-tr.active {
-	background-color: rgb(100,161,204);
-}
-</style>

@@ -3,21 +3,15 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import '@/styles.scss';
 
 import Vue from 'vue';
+import store from './store'
 import App from './App.vue';
 import router from './router';
 
-import VueApexCharts from 'vue-apexcharts';
 import { Datetime } from 'vue-datetime';
 import 'vue-datetime/dist/vue-datetime.css';
 
-import * as firebase from 'firebase/app';
-import 'firebase/auth';
-import 'firebase/firestore';
-import firebaseConfig from './firebase.config';
-
-
-Vue.use(VueApexCharts);
-Vue.component('apexchart', VueApexCharts);
+import 'd3';
+import 'c3/c3.min.css';
 
 Vue.use(Datetime);
 Vue.component('datetime', Datetime);
@@ -28,9 +22,12 @@ Vue.filter('date', value => {
 
 Vue.config.productionTip = false;
 
-firebase.initializeApp(firebaseConfig);
+router.beforeEach((to, from, next) => {
+  //auth
+});
 
 new Vue({
   router,
+  store,
   render: h => h(App)
 }).$mount('#app')
