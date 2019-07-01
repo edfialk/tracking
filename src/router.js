@@ -12,9 +12,6 @@ export default new Router({
       path: '/',
       name: 'home',
       component: Home,
-      beforeEnter(to, from, next) {
-        console.log('A', to, from, next);
-      }
     },
     {
       path: '/login',

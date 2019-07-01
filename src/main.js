@@ -22,9 +22,9 @@ Vue.filter('date', value => {
 
 Vue.config.productionTip = false;
 
-router.beforeEach((to, from, next) => {
-  //auth
-});
+// router.beforeEach((to, from, next) => {
+//   //auth
+// });
 
 new Vue({
   router,
