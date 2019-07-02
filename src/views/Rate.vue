@@ -1,38 +1,43 @@
 <template>
      <div class="container h-100 pt-3 text-center">
-        <div>
+        <div v-if="myRating.tracker">
+            <div class="form-group">
+                <select class="form-control" id="trackerSelect" v-model="myRating.tracker">
+                    <option v-for="(tracker, index) in trackers" :key="index" :value="tracker">{{ tracker }}</option>
+                </select>
+            </div>
             <div class="shadow p-3 mb-3 bg-white rounded text-dark">
-                <div v-if="lastRating">
-                    <h3>Last Rating: {{ lastRating.rating }}</h3>
+                <div v-if="myRating.tracker">
+                    <h5>Last Rating: {{ lastRating.rating }}</h5>
                     <h5>from {{ lastRating.date | date }}</h5>
                 </div>
-                <h5 class="mb-0">How bad is it now?</h5>
+                <p class="mb-0">How bad is it now?</p>
             </div>
             <div class="row mb-3">
                 <div class="col">
-                    <button class="btn btn-block btn-success btn-lg shadow" @click="modifyRating(10)">A little better</button>
+                    <button class="btn btn-block btn-success shadow" @click="modifyRating(1)">A little better</button>
                 </div>
                 <div class="col">
-                    <button class="btn btn-block btn-danger btn-lg shadow" @click="modifyRating(-10)">A little worse</button>
+                    <button class="btn btn-block btn-danger shadow" @click="modifyRating(-1)">A little worse</button>
                 </div>
             </div>
             <div class="row mb-3">
                 <div class="col">
-                    <button class="btn btn-block btn-success btn-lg shadow" @click="modifyRating(20)">A lot better</button>
+                    <button class="btn btn-block btn-success shadow" @click="modifyRating(2)">A lot better</button>
                 </div>
                 <div class="col">
-                    <button class="btn btn-block btn-danger btn-lg shadow" @click="modifyRating(-20)">A lot worse</button>
+                    <button class="btn btn-block btn-danger shadow" @click="modifyRating(-2)">A lot worse</button>
                 </div>
             </div>
             <div class="form-group shadow p-3 mb-3 bg-white rounded">
-                <label for="inputRange">Or you can poke this thing</label>
-                <input type="range" class="form-control-range" id="inputRange" v-model="newRating">
+                <label for="inputRange">Or you can drag this thing</label>
+                <input type="range" class="form-control-range" id="inputRange" v-model="myRating.rating" min="1" max="10">
             </div>
-            <div class="bg-danger text-light p-3 mb-3 shadow rounded" v-if="status.error">
-                {{ status.error }}
+            <div class="bg-danger text-light p-3 mb-3 shadow rounded" v-if="error">
+                {{ error }}
             </div>
-            <button class="btn btn-block btn-primary btn-lg shadow" :class="{ disabled: status.loading }" @click="save">
-                <span class="oi oi-reload spinner" v-if="status.loading"></span>
+            <button class="btn btn-block btn-primary btn-lg shadow" :class="{ disabled: loading }" @click="save">
+                <span class="oi oi-reload spinner" v-if="loading"></span>
                 <span v-else>Save</span>
             </button>
         </div>
@@ -41,28 +46,35 @@
 
 <script>
 
-export default {
+import { mapState } from 'vuex';
 
-    props: {
-        ratings: {
-            type: Array
-        },
-        status: {
-            type: Object
-        }
-    },
+export default {
 
     data() {
         return {
-            newRating: 50,
+            myRating: {
+                tracker: '',
+                rating: 5,
+                date: null
+            },
+            error: null,
+            loading: false,
         }
     },
 
     computed: {
+        ...mapState('ratings', {
+            ratings: 'all'
+        }),
+
+        trackers() {
+            return this.$store.getters['ratings/getTrackers'];
+        },
+
         lastRating() {
             if (this.ratings && this.ratings.length > 0){
                 return this.ratings.reduce((acc, cur) => {
-                    if (cur.date > acc.date)
+                    if (cur.tracker == this.myRating.tracker && cur.date > acc.date)
                         return cur;
                     return acc;
                 });
@@ -70,28 +82,46 @@ export default {
 
             return null;
         }
+
     },
 
     methods: {
         modifyRating(change){
-            this.newRating = this.lastRating.rating * 10 + change;
+            this.myRating.rating = this.lastRating.rating + change;
         },
 
-        save() {
-            this.$emit('saveRating', Math.round(this.newRating / 10));
+        async save() {
+
+            try {
+
+                this.loading = true;
+
+                await this.$store.dispatch('ratings/add', this.myRating, { root: true });
+
+                this.loading = false;
+                this.$router.push('/kitty');
+
+            } catch (e) {
+                this.error = e;
+            }
         },
+    },
+
+    created() {
+        if (this.trackers.length > 0) {
+            this.myRating.tracker = this.trackers[0];
+            this.myRating.rating = this.lastRating.rating;
+        }
     },
 
     watch: {
-        status:{
-            handler(val) {
-                if (!val.loading && !val.error){
-                    this.$router.push('/kitty');
-                }
-            },
-            deep: true
+        trackers(val) {
+            if (val.length) {
+                this.myRating.tracker = val[0];
+                this.myRating.rating = this.lastRating.rating;
+            }
         }
-    },
+    }
 
 };
 

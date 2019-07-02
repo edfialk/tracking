@@ -28,7 +28,7 @@
     </div>
 
     <div class="mb-3 p-3 bg-light rounded shadow text-center">
-      Chart with this thing highlighted will go here.
+      <Chart :chartData="chartData" :xmin="xmin" :xmax="xmax" :regions="chartRegions"></Chart>
     </div>
 
     <DateTable
@@ -81,13 +81,16 @@
                 autofocus
               />
             </form>
+            <div class="alert alert-danger mt-3" v-if="isNameTaken">
+              That name is already taken. Please use another.
+            </div>
           </div>
           <div class="modal-footer">
             <button
               type="button"
               class="btn btn-primary"
               @click="onSubmitName"
-            >Save</button>
+            >Change Name</button>
             <button
               type="button"
               class="btn btn-secondary"
@@ -147,43 +150,38 @@
 </template>
 
 <script>
-import DateTable from "../components/DateTable";
-import jQuery from "jquery";
+import { mapState } from 'vuex';
+import DateTable from '../components/DateTable';
+import jQuery from 'jquery';
 let $ = jQuery;
+import Chart from '../components/Chart';
 
 export default {
-  props: {
-    id: {
-      type: String
-    },
-    things: {
-      type: Array
-    }
-  },
 
-  components: { DateTable },
+  components: { DateTable, Chart },
 
   data() {
     return {
       thing: null,
       showModal: false,
-      inputName: ""
+      inputName: '',
+      isNameTaken: false,
     };
   },
 
   created() {
-    this.thing = this.things.find(e => e.id === this.id);
-  },
+    this.thing = this.$store.getters['things/getById'](this.$route.params.id);
 
-  watch: {
-    things: {
-      handler(val) {
-        this.thing = val.find(e => e.id === this.id);
-      }
-    }
+    this.$store.watch(() => {
+      this.thing = this.$store.getters['things/getById'](this.$route.params.id);
+    });
   },
 
   computed: {
+    ...mapState('ratings', {
+      ratings: 'all'
+    }),
+
     latestDate() {
       if (!this.thing.dates || this.thing.dates.length == 0) {
         return null;
@@ -196,12 +194,87 @@ export default {
         })
         .pop();
       return date.end || date.date;
-    }
+    },
+
+    earliestDate() {
+      if (!this.thing.dates || this.thing.dates.length == 0) {
+        return null;
+      }
+      let date = this.thing.dates.slice()
+        .sort((a, b) => {
+          let x = a.end || a.date;
+          let y = b.end || b.date;
+          return new Date(y) - new Date(x);
+        })
+        .pop();
+      return date.start || date.date;
+    },
+
+    xmin() {
+      let date = new Date(this.earliestDate);
+      date.setDate(date.getDate() - 1);
+      return date;
+    },
+
+    xmax() {
+      let date = new Date(this.latestDate);
+      date.setDate(date.getDate() + 1);
+      return date;
+    },
+
+    chartData() {
+      let data = {
+        type: "spline",
+        xs: {},
+        columns: []
+      };
+
+      let dates = {};
+      let ratings = {};
+
+      this.ratings.forEach(rating => {
+        let t = rating.tracker;
+        if (!dates[t]) {
+          dates[t] = [];
+        }
+        if (!ratings[t]) {
+          ratings[t] = [];
+        }
+
+        dates[t].push(rating.date);
+        ratings[t].push(rating.rating);
+      });
+
+      for (let series in dates) {
+        data.xs[series] = 'x' + series;
+        data.columns.push([series, ...ratings[series]]);
+        data.columns.push(['x' + series, ...dates[series]]);
+      }
+
+      return data;
+    },
+
+    chartRegions() {
+      return [{ thing: this.thing, color: 'region-color--0' }];
+    },
+
   },
 
   methods: {
-    save() {
-      this.$emit("saveThing", this.thing);
+    async save(forward = true) {
+
+      try {
+        this.loading = true;
+        await this.$store.dispatch('things/save', this.thing, { root: true });
+        this.loading = false;
+
+        if (forward)
+          this.$router.push('/kitty');
+      
+      } catch (e) {
+        this.loading = false;
+        this.error = e;
+      }
     },
 
     stop() {
@@ -217,41 +290,60 @@ export default {
       }, 10);
     },
 
-    delete() {
-      this.$emit("deleteThing", this.thing);
+    async delete() {
+      
+      try {
+        this.loading = true;
+        await this.$store.dispatch('things/delete', this.thing, { root: true });
+        this.loading = false;
+        this.$router.push("/");
+      } catch (e) {
+        this.loading = false;
+        this.error = e;
+      }
+
     },
 
     setDates(dates) {
       this.thing.dates = dates;
-      this.save();
+      this.save(false);
     },
 
     onClickDelete() {
       if (confirm("Are you sure?")) {
         this.delete();
-        this.$router.push("/");
       }
     },
 
     onSubmitName() {
+
+      let t = this.$store.state.things.all.find(e => e.name == this.inputName);
+      if (t) {
+        this.isNameTaken = true;
+        return;
+      } 
+      
+      this.isNameTaken = false;
       $("#modal-name").modal("hide");
+
       if (this.inputName.length == 0) return;
+
       this.thing.name = this.inputName;
       this.inputName = "";
-      this.save();
+      this.save(false);
     },
 
     onClickUseOnce() {
       $("#modal-start").modal("hide");
-      this.thing.dates.push({date: new Date().toISOString()});
-      this.save();
+      this.thing.dates.push({date: new Date()});
+      this.save(false);
     },
 
     onClickUseOngoing() {
       $("#modal-start").modal("hide");
-      this.thing.since = new Date().toISOString();
+      this.thing.since = new Date();
       this.thing.active = true;
-      this.save();
+      this.save(false);
     }
   }
 };

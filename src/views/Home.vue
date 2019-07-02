@@ -5,19 +5,20 @@
 
       <div class="mb-3">
         <router-link to="/rate" class="btn btn-lg btn-primary btn-block">Rate Yoself</router-link>
-        <router-link to="/thing/add" class="btn btn-lg btn-primary btn-block">Add a Thing</router-link>
         <router-link to="/photo" class="btn btn-lg btn-primary btn-block">Selfie!</router-link>
+        <router-link to="/thing/add" class="btn btn-lg btn-primary btn-block">Add a Thing</router-link>
         <router-link to="/tracker/add" class="btn btn-lg btn-primary btn-block">Track Something</router-link>
       </div>
 
       <Chart :chartData="chartData" :regions="selectedThings"></Chart>
 
-      <Things :things="things" @toggleThing="toggleThing"></Things>
+      <Things @toggleThing="toggleThing"></Things>
     </div>
 </template>
 
 <script>
 
+import { mapState } from 'vuex';
 import Things from '../components/Things';
 import Chart from '../components/Chart';
 
@@ -25,25 +26,12 @@ export default {
 
   name: 'home',
   
-  props: {
-    things: {
-      type: Array
-    },
-    ratings: {
-      type: Array
-    }
-  },
-
   components: { Things, Chart },
 
   data() {
     return {
       selectedThings: [],
     };
-  },
-
-  mounted() {
-    this.$emit('reset');
   },
 
   methods: {
@@ -64,23 +52,46 @@ export default {
 
   computed: {
 
+    ...mapState('ratings', {
+      ratings: 'all'
+    }),
+
     chartData() {
 
-      let x = ['date'];
-      let y = ['rating'];
-
-      this.ratings.forEach(rating => {
-        x.push(new Date(rating.date));
-        y.push(rating.rating);
-      });
-
-      return {
-        columns: [ x, y ]
+      let data = {
+        type: "spline",
+        xs: {},
+        columns: []
       };
 
-    }
+      let dates = {};
+      let ratings = {};
 
-  }
+      this.ratings.forEach(rating => {
+        let t = rating.tracker;
+        if (!dates[t]) {
+          dates[t] = [];
+        }
+        if (!ratings[t]) {
+          ratings[t] = [];
+        }
+
+        dates[t].push(rating.date);
+        ratings[t].push(rating.rating);
+      });
+
+      for (let series in dates) {
+        data.xs[series] = 'x' + series;
+        data.columns.push([series, ...ratings[series]]);
+        data.columns.push(['x' + series, ...dates[series]]);
+      }
+
+      return data;
+
+    },
+
+
+  },
 
 }
 

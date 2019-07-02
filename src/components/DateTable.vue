@@ -33,7 +33,17 @@
       </div>
       <ul class="list-group list-group-flush">
         <li class="list-group-item" v-for="(range, i) in dates" :key="i">
-          {{ displayRange(range) }}
+          <span v-if="range.date" @click="onClickSingleDate(range, i)">
+            {{ range.date | date }}
+          </span>
+          <span v-if="range.start" @click="onClickStartDate(range, i)">
+            {{ range.start | date }}
+          </span>
+          <span v-if="range.start && range.end"> - </span>
+          <span v-if="range.end" @click="onClickEndDate(range, i)">
+            {{ range.end | date }}
+          </span>
+          <!-- {{ displayRange(range) }} -->
         </li>
       </ul>
     </div>
@@ -121,18 +131,6 @@ export default {
     save() {
       this.$emit('save', this.dates);
     },
-
-    displayRange(range) {
-      if (range.date){
-        return new Date(range.date).toLocaleDateString();
-      }
-
-      if (range.start && range.end) {
-        return new Date(range.start).toLocaleDateString() + ' - ' + new Date(range.end).toLocaleDateString();
-      }
-
-      return "You shouldn't be seeing this.";
-    }
 
   }
 

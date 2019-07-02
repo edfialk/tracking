@@ -11,6 +11,7 @@
           id="name"
           v-model="thing.name"
           required
+          @change="onNameChange"
         >
       </div>
 
@@ -111,27 +112,28 @@
 
       <div
         class="bg-danger text-light p-3 mb-3 shadow rounded"
-        v-if="status.error"
-      >
-        {{ status.error }}
-      </div>
-
-      <div
-        class="bg-danger text-light p-3 mb-3 shadow rounded"
         v-if="error"
       >
         {{ error }}
       </div>
 
+      <div
+        class="bg-danger text-light p-3 mb-3 shadow rounded"
+        v-if="isNameTaken"
+      >
+        That name is already taken. Click <router-link :to="takenNameURL">here</router-link> to edit that thing.
+      </div>
+
+
       <div class="form-group">
         <button
           type="submit"
           class="btn btn-block btn-primary shadow"
-          :class="{ disabled: status.loading }"
+          :class="{ disabled: loading }"
         >
           <span
             class="oi oi-reload spinner"
-            v-if="status.loading"
+            v-if="loading"
           ></span>
           <span v-else>Save</span>
         </button>
@@ -141,16 +143,10 @@
 </template>
 
 <script>
-export default {
-  props: {
-    status: {
-      type: Object
-    }
-  },
 
+export default {
   data() {
     return {
-      isSingleUse: true,
       thing: {
         name: "",
         active: false,
@@ -161,12 +157,16 @@ export default {
         }],
         since: null
       },
-      error: ""
+      isSingleUse: true,
+      isNameTaken: false,
+      takenNameURL: null,
+      error: null,
+      loading: false
     };
   },
 
   methods: {
-    save() {
+    async save() {
 
       if (this.isSingleUse && !this.thing.dates[0].date) {
         this.error = "You need to set a date.";
@@ -186,8 +186,29 @@ export default {
         return;
       }
 
-      this.$emit("addThing", this.thing);
+      if (this.isNameTaken) return;
 
+      try {
+
+        this.loading = true;
+
+        await this.$store.dispatch('things/add', this.thing, { root: true });
+
+        this.loading = false;
+        this.$router.push('/kitty');
+
+      } catch (e) {
+        this.error = e;
+      }
+
+    },
+
+    onNameChange() {
+      let t = this.$store.state.things.all.find(e => e.name == this.thing.name);
+      if (t) {
+        this.isNameTaken = true;
+        this.takenNameURL = '/thing/' + t.id;
+      }
     }
   },
 

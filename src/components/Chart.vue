@@ -15,6 +15,12 @@ export default {
     },
     regions: {
       type: Array
+    },
+    xmin: {
+      type: Date
+    },
+    xmax: {
+      type: Date
     }
   },
 
@@ -26,36 +32,43 @@ export default {
 
 	mounted() {
 
-    let data = {
-      type: 'spline',
-      x: 'date',
-      columns: []
+    let axis = {
+      x: {
+        type: 'timeseries',
+        tick: { 
+          count: 6,
+          format: '%m-%d'
+        }
+      }
     };
 
-    if (this.chartData.columns[0].length > 1){
-      data.columns = this.chartData.columns;
-    }
+    let zoom = {
+      enabled: true,
+      // onzoom (domain) {}
+    };
 
 		this.chart = c3.generate({
         bindto: '#chart',
-        data,
-        axis: {
-					x: {
-						type: 'timeseries',
-						tick: { 
-              count: 6,
-              format: '%m-%d'
-            }
-					}
-        },
-        zoom: {
-          enabled: true
-        },
+        data: this.chartData,
+        axis,
+        zoom
         // subchart: {
         //   show: true
         // }
-		});
-	},
+    });
+    
+    if (this.xmin && this.xmax) {
+      window.setTimeout(() => {
+        this.chart.zoom([this.xmin, this.xmax]);
+      }, 0);
+    }
+
+    if (this.regions) {
+      this.chart.regions(this.chartRegions.regions);
+      this.chart.xgrids(this.chartRegions.lines);
+    }
+
+  },
 
   watch: {
     regions() {

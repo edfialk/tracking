@@ -7,7 +7,7 @@
     <table class="table table-last-col-right">
       <tbody>
         <tr
-          v-for="thing in activeThings"
+          v-for="thing in $store.getters['things/active']"
           v-bind:key="thing.id"
         >
           <td @click="onRowClick(thing, $event)">{{ thing.name }}</td>
@@ -25,7 +25,7 @@
     <table class="table table-last-col-right">
       <tbody>
         <tr
-          v-for="thing in inactiveThings"
+          v-for="thing in $store.getters['things/inactive']"
           v-bind:key="thing.id"
         >
           <td @click="onClickThing(thing, $event)">{{ thing.name }}</td>
@@ -42,16 +42,14 @@
 </template>
 
 <script>
+
+import { mapState } from 'vuex';
+
 export default {
-  props: {
-    things: {
-      type: Array
-    }
-	},
 	
 	data() {
 		return {
-      selectedThings: []
+      selected: []
 		};
 	},
 
@@ -63,35 +61,27 @@ export default {
       if (!tr.classList.contains('active')){
         color = this.getNextColorClass();
         tr.classList.add('active', color);
-        this.selectedThings.push({ tr, thing, color });
+        this.selected.push({ tr, thing, color });
       } else {
-        let t = this.selectedThings.find(e => e.thing.id === thing.id);
+        let t = this.selected.find(e => e.thing.name === thing.name);
         tr.classList.remove('active', t.color);
-        this.selectedThings = this.selectedThings.filter(e => e.thing.id !== thing.id);
+        this.selected = this.selected.filter(e => e.thing.name !== thing.name);
       }
 
       this.$emit('toggleThing', thing, color);
     },
 
     getNextColorClass() {
-      return 'region-color--' + this.selectedThings.length;
-    }
-  },
-
-  filters: {
-    date(value) {
-      return value.toLocaleDateString();
+      return 'region-color--' + this.selected.length;
     }
   },
 
   computed: {
-    activeThings() {
-      return this.things.filter(thing => thing.since);
-    },
 
-    inactiveThings() {
-      return this.things.filter(thing => !thing.since);
-    }
+    ...mapState({
+      things: state => state.things.all,
+    }),
+    
   }
 };
 </script>
