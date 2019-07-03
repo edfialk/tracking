@@ -2,7 +2,7 @@
 
   <div class="box mb-3 box border rounded bg-light">
     <div class="p-3 text-center">
-      <h5 class="mb-0">Active Things</h5>
+      <h5 class="mb-0">Stuff you are using now</h5>
     </div>
     <table class="table table-last-col-right">
       <tbody>
@@ -20,7 +20,7 @@
       </tbody>
     </table>
     <div class="p-3 text-center">
-      <h5 class="mb-0">Inactive Things</h5>
+      <h5 class="mb-0">Stuff you ain't</h5>
     </div>
     <table class="table table-last-col-right">
       <tbody>

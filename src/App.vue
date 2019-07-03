@@ -1,7 +1,12 @@
 <template>
-  <main id="app" class="w-100 h-100">
+  <main id="app" class="">
     <Nav></Nav>
-    <router-view />
+      <transition
+        :name="transitionName"
+        mode="out-in"
+      >
+        <router-view />
+      </transition>
   </main>
 </template>
 
@@ -13,10 +18,28 @@ export default {
 
   components: { Nav },
 
+  data() {
+    return {
+      transitionName: 'fade'
+    }
+  },
+
   created() {
     this.$store.dispatch('things/get');
     this.$store.dispatch('ratings/get');
+
+    this.$router.beforeEach((to, from, next) => {
+      if (to.path !== '/') {
+        this.transitionName = 'slide-left';
+      } else {
+        this.transitionName = 'slide-right';
+      }
+
+      next();
+    })
+
   },
+
 }
 
 </script>

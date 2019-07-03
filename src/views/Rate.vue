@@ -120,6 +120,10 @@ export default {
                 this.myRating.tracker = val[0];
                 this.myRating.rating = this.lastRating.rating;
             }
+        },
+
+        'myRating.tracker'() {
+            this.myRating.rating = this.lastRating.rating;
         }
     }
 

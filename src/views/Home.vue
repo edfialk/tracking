@@ -1,7 +1,5 @@
 <template>
-    <div class="container">
-
-      <!-- <h1 class="cover-heading">Hi Lerb.</h1> -->
+    <div class="container pt-3">
 
       <div class="mb-3">
         <router-link to="/rate" class="btn btn-lg btn-primary btn-block">Rate Yoself</router-link>
@@ -48,7 +46,7 @@ export default {
       this.selectedThings.push({ thing, color });
     }
 
-  },
+  }, //methods
 
   computed: {
 
@@ -69,12 +67,8 @@ export default {
 
       this.ratings.forEach(rating => {
         let t = rating.tracker;
-        if (!dates[t]) {
-          dates[t] = [];
-        }
-        if (!ratings[t]) {
-          ratings[t] = [];
-        }
+        dates[t] = dates[t] || [];
+        ratings[t] = ratings[t] || [];
 
         dates[t].push(rating.date);
         ratings[t].push(rating.rating);
@@ -90,8 +84,7 @@ export default {
 
     },
 
-
-  },
+  }, //computed
 
 }
 
