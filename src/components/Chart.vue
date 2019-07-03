@@ -61,6 +61,10 @@ export default {
       window.setTimeout(() => {
         this.chart.zoom([this.xmin, this.xmax]);
       }, 0);
+
+      // window.setTimeout(() => {
+      //   this.chart.zoom([new Date('May 23 2019'), new Date('June 12 2019')]);
+      // }, 10);
     }
 
     if (this.regions) {

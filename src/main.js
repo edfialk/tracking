@@ -7,6 +7,9 @@ import store from './store/index.js'
 import App from './App.vue';
 import router from './router';
 
+import * as firebase from 'firebase/app';
+import 'firebase/auth';
+
 import { Datetime } from 'vue-datetime';
 import 'vue-datetime/dist/vue-datetime.css';
 
@@ -22,12 +25,12 @@ Vue.filter('date', value => {
 
 Vue.config.productionTip = false;
 
-// router.beforeEach((to, from, next) => {
-//   //auth
-// });
+firebase.auth().onAuthStateChanged(user => {
+  store.commit('setUser', user);
+  new Vue({
+    router,
+    store,
+    render: h => h(App)
+  }).$mount('#app')
+});
 
-new Vue({
-  router,
-  store,
-  render: h => h(App)
-}).$mount('#app')

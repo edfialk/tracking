@@ -53,6 +53,8 @@ export default new Vuex.Store({
       await state.db.auth().signInWithEmailAndPassword(email, password);
 
       commit('setUser', state.db.auth().currentUser);
+      commit('setStatus', 'success');
+      commit('setError', null);
     },
 
     async getTrackers ({ commit, state }) {
@@ -71,33 +73,24 @@ export default new Vuex.Store({
 
     },
 
-    // async getRatings ({ commit, state }) {
-    //   try {
-
-    //     let query = state.db.collection('ratings');
-    //     // .where('user_id', '==', 1);
-    //     let resp = await query.get();
-    //     let ratings = resp.docs.map(doc => {
-    //       return {
-    //         ...doc.data(),
-    //         date: new Date(doc.data().date.toMillis())
-    //       };
-    //     });
-
-    //     commit('setRatings', ratings);
-
-    //   } catch (e) {
-    //     commit('setError', e);
-    //     console.log(e);
-    //   }
-    // },
-
-
-
   },
 
   getters: {
+    status (state) {
+      return state.status
+    },
 
+    user (state) {
+      return state.user
+    },
+
+    error (state) {
+      return state.error
+    },
+    
+    isLoggedIn: state => {
+      return state.user !== null;
+    }
 
   }
 })

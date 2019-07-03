@@ -11,11 +11,11 @@ const getters = {
         return state.all.filter(thing => !thing.active);
     },
 
-    getById: (state) => (id) => {
+    id: (state) => (id) => {
         return state.all.find(t => t.id === id);
     },
 
-    getByName: (state) => (name) => {
+    name: (state) => (name) => {
         return state.all.find(t => t.name === name);
     }
 };
@@ -44,7 +44,8 @@ const actions = {
     add ({ commit, rootState }, thing) {
         return new Promise(async (resolve, reject) => {
             try {
-                await rootState.db.collection('factors').add(thing);
+                let ref = await rootState.db.collection('factors').add(thing);
+                thing.id = ref.id;
                 commit('add', thing);
                 resolve();
             } catch (e) {

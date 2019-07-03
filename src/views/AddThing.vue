@@ -74,24 +74,39 @@
         <datetime
           :bootstrap-styling="true"
           input-class="form-control"
-          v-model="thing.dates[0].date"
+          v-model="date"
           ref="singleDate"
+          value-zone="America/Los_Angeles"
+        ></datetime>
+      </div>
+
+
+      <div
+        class="form-group"
+        v-if="!isSingleUse && thing.active"
+      >
+        <label>When did you start?</label>
+        <datetime
+          :bootstrap-styling="true"
+          input-class="form-control"
+          v-model="since"
+          ref="startDate"
           value-zone="America/Los_Angeles"
         ></datetime>
       </div>
 
       <div
         class="form-group"
-        v-if="!isSingleUse"
+        v-if="!isSingleUse && !thing.active"
       >
         <label>When did you start?</label>
         <datetime
           :bootstrap-styling="true"
           input-class="form-control"
-          v-model="thing.dates[0].start"
+          v-model="start"
           ref="startDate"
           value-zone="America/Los_Angeles"
-          :max-datetime="thing.dates[0].end"
+          :max-datetime="end"
         ></datetime>
       </div>
 
@@ -103,10 +118,10 @@
         <datetime
           :bootstrap-styling="true"
           input-class="form-control"
-          v-model="thing.dates[0].end"
+          v-model="end"
           ref="endDate"
           value-zone="America/Los_Angeles"
-          :min-datetime="thing.dates[0].start"
+          :min-datetime="start"
         ></datetime>
       </div>
 
@@ -149,14 +164,18 @@ export default {
     return {
       thing: {
         name: "",
-        active: false,
-        dates: [{
-          start: null,
-          end: null,
-          date: null
-        }],
-        since: null
+        active: true,
+        // dates: [{
+        //   start: null,
+        //   end: null,
+        //   date: null
+        // }],
+        // since: null
       },
+      start: null,
+      end: null,
+      date: null,
+      since: null,
       isSingleUse: true,
       isNameTaken: false,
       takenNameURL: null,
@@ -166,27 +185,59 @@ export default {
   },
 
   methods: {
-    async save() {
 
-      if (this.isSingleUse && !this.thing.dates[0].date) {
+    validate() {
+
+      if (this.isSingleUse && !this.date) {
         this.error = "You need to set a date.";
         // this.$refs['singleDate'].focus();
-        return;
-      }
-      
-      if (!this.isSingleUse && !this.thing.dates[0].start) {
-        this.error = "You need to set a start date.";
-        // this.$refs['startDate'].focus();
-        return;        
-      }
-      
-      if (!this.isSingleUse && !this.active && !this.thing.dates[0].end) {
-        this.error = "You need to set an end date.";
-        // this.$refs['endDate'].focus();
-        return;
+        return false;
       }
 
-      if (this.isNameTaken) return;
+      if (!this.isSingleUse && this.thing.active && !this.thing.since) {
+        this.error = "You need to set a start date.";
+        // this.$refs['startDate'].focus();
+        return false;        
+      }
+
+      if (!this.isSingleUse && !this.thing.active && !this.start) {
+        this.error = "You need to set a start date.";
+        // this.$refs['startDate'].focus();
+        return false;        
+      }
+      
+      if (!this.isSingleUse && !this.thing.active && !this.end) {
+        this.error = "You need to set an end date.";
+        // this.$refs['endDate'].focus();
+        return false;
+      }
+
+      if (this.isNameTaken) {
+        this.error = "That name is taken."
+        return false;
+      }
+
+      return true;
+
+    },
+
+    async save() {
+
+      if (!this.validate) return;
+
+      if (this.thing.active) {
+        this.thing.since = this.since;
+      } else {
+        let date = {};
+        if (this.isSingleUse) {
+          date.date = this.date;
+        } else {
+          date.start = this.start;
+          date.end = this.end;
+        }
+
+        this.thing.date = [date];
+      }
 
       try {
 
@@ -215,17 +266,17 @@ export default {
   watch: {
     isSingleUse(val) {
       if (val) {
-        this.thing.dates[0].start = null;
-        this.thing.dates[0].end = null;
+        this.start = null;
+        this.end = null;
       } else {
-        this.thing.dates[0].date = null;
+        this.date = null;
       }
     },
 
     'thing.active'(val) {
       if (val) {
-        this.thing.dates[0].end = null;
-        this.thing.dates[0].end = null;
+        this.end = null;
+        this.end = null;
       } else {
         this.thing.since = null;
       }

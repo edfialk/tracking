@@ -34,6 +34,7 @@
     <DateTable
       :dates="thing.dates"
       @save="setDates"
+      v-if="thing.dates && thing.dates.length > 0"
     ></DateTable>
 
     <div class="mb-3">
@@ -170,10 +171,10 @@ export default {
   },
 
   created() {
-    this.thing = this.$store.getters['things/getById'](this.$route.params.id);
+    this.thing = this.$store.getters['things/id'](this.$route.params.id);
 
     this.$store.watch(() => {
-      this.thing = this.$store.getters['things/getById'](this.$route.params.id);
+      this.thing = this.$store.getters['things/id'](this.$route.params.id);
     });
   },
 
@@ -211,12 +212,16 @@ export default {
     },
 
     xmin() {
+      if (!this.earliestDate) return null;
+
       let date = new Date(this.earliestDate);
       date.setDate(date.getDate() - 1);
       return date;
     },
 
     xmax() {
+      if (!this.latestDate) return null;
+      
       let date = new Date(this.latestDate);
       date.setDate(date.getDate() + 1);
       return date;
@@ -261,16 +266,14 @@ export default {
   },
 
   methods: {
-    async save(forward = true) {
 
+    async save(forward = true) {
       try {
         this.loading = true;
         await this.$store.dispatch('things/save', this.thing, { root: true });
         this.loading = false;
-
         if (forward)
           this.$router.push('/kitty');
-      
       } catch (e) {
         this.loading = false;
         this.error = e;
@@ -286,12 +289,11 @@ export default {
       //need to wait before re-render or click gets fired on new button
       window.setTimeout(() => {
         this.thing.active = false;
-        this.save();
+        this.save(false);
       }, 10);
     },
 
     async delete() {
-      
       try {
         this.loading = true;
         await this.$store.dispatch('things/delete', this.thing, { root: true });
@@ -301,7 +303,6 @@ export default {
         this.loading = false;
         this.error = e;
       }
-
     },
 
     setDates(dates) {
@@ -317,7 +318,7 @@ export default {
 
     onSubmitName() {
 
-      let t = this.$store.state.things.all.find(e => e.name == this.inputName);
+      let t = this.$store.getters['things/name'](this.inputName);
       if (t) {
         this.isNameTaken = true;
         return;

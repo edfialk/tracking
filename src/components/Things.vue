@@ -10,7 +10,7 @@
           v-for="thing in $store.getters['things/active']"
           v-bind:key="thing.id"
         >
-          <td @click="onRowClick(thing, $event)">{{ thing.name }}</td>
+          <td @click="onClickThing(thing, $event)">{{ thing.name }}</td>
           <td>
             <router-link :to="'/thing/' + thing.id">
               <span class="oi oi-chevron-right text-muted"></span>
