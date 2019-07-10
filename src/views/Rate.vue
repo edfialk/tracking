@@ -67,9 +67,10 @@ export default {
             ratings: 'all'
         }),
 
-        trackers() {
-            return this.$store.getters['ratings/getTrackers'];
-        },
+        ...mapState('trackers', {
+            trackers: 'all'
+        }),
+
 
         lastRating() {
             if (this.ratings && this.ratings.length > 0){

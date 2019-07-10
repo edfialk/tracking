@@ -26,7 +26,10 @@ export default {
 
   created() {
     this.$store.dispatch('things/get');
-    this.$store.dispatch('ratings/get');
+    // this.$store.dispatch('ratings/get');
+    this.$store.dispatch('trackers/get');
+
+    console.log(this.$store.getters['ratings/getNextDoc']('adorableness'));
 
     this.$router.beforeEach((to, from, next) => {
       if (to.path !== '/') {

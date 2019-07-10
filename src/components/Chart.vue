@@ -1,6 +1,7 @@
 <template>
-  <div class="bg-light p-1 rounded mb-3">
-		<div id="chart"></div>
+  <div class="bg-light p-1 rounded mb-3 text-center">
+    <h5 class="my-5" v-if="!hasData">Add data to see this chart.</h5>
+		<div id="chart" v-if="hasData"></div>
   </div>
 </template>
 
@@ -22,12 +23,6 @@ export default {
     xmax: {
       type: Date
     }
-  },
-
-  data: function() {
-    return {
-      myRegions: [],
-    };
   },
 
 	mounted() {
@@ -123,6 +118,10 @@ export default {
         return acc;
 
       }, { lines: [], regions: [] });
+    },
+
+    hasData() {
+      return this.chartData.columns && this.chartData.columns.length > 0;
     }
   }
 };

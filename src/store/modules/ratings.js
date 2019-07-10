@@ -3,9 +3,6 @@ const state = {
 };
 
 const getters = {
-    getByTracker: (state) => (tracker) => {
-        return state.all.filter(rating => rating.tracker === tracker);
-    },
     get: state => {
         return state.all.reduce((acc, cur) => {
             if (cur.tracker){
@@ -15,49 +12,54 @@ const getters = {
             return acc;
         }, {});
     },
-    getTrackers: state => {
-        let trackers = new Set();
-        state.all.forEach(rating => {
-            trackers.add(rating.tracker);
-        });
-        return Array.from(trackers);
-    }
+    tracker: (state) => (tracker) => {
+        return state.all.filter(rating => rating.tracker === tracker);
+    },
 };
 
 const actions = {
-    get ({ commit, rootState }) {
-        return new Promise(async (resolve, reject) => {
-            try {
-                let query = rootState.db.collection('ratings');
-                let resp = await query.get();
-                let all = resp.docs.map(doc => {
-                    return {
-                        ...doc.data(),
-                        date: new Date(doc.data().date.toMillis())
-                    };
-                });
-                commit('set', all);
-                resolve(all);
-            } catch (e) {
-                commit('setError', e, { root: true });
-                console.log(e);
-                reject(e);
-            }
-        });
-    },
+    // get ({ commit, rootState }) {
+    //     return new Promise(async (resolve, reject) => {
+    //         try {
+    //             let query = rootState.db.collection('ratings');
+    //             let resp = await query.get();
+    //             let all = resp.docs.map(doc => {
+    //                 return {
+    //                     ...doc.data(),
+    //                     date: new Date(doc.data().date.toMillis())
+    //                 };
+    //             });
+    //             commit('set', all);
+    //             resolve(all);
+    //         } catch (e) {
+    //             commit('error', e, { root: true });
+    //             console.log(e);
+    //             reject(e);
+    //         }
+    //     });
+    // },
 
     add ({ commit, rootState }, rating) {
         return new Promise(async (resolve, reject) => {
             try {
-                if (rating.rating > 10) {
-                    rating.rating = Math.round(rating.rating / 10);
+                if (!rating.tracker) {
+                    commit('error', 'Invalid rating.', { root: true });
+                    reject('Invalid rating.');
                 }
+
+                let trackerRef = await rootState.db.collection(rating.tracker);
+                if (!trackerRef) {
+                    commit('error', 'Tracker not found.', { root: true });
+                    reject('Tracker not found.');
+                }
+                
                 rating.date = new Date();
-                await rootState.db.collection('ratings').add(rating);
+                let ratingRef = await trackerRef.collection('ratings').add(rating);
+                rating.id = ratingRef.id;
                 commit('add', rating);
                 resolve(rating);
             } catch (e) {
-                commit('setError', e, { root: true });
+                commit('error', e, { root: true });
                 console.log(e);
                 reject(e);
             }

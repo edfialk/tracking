@@ -47,6 +47,7 @@
 </template>
 
 <script>
+import { mapActions } from 'vuex';
 import * as moment from 'moment';
 import * as firebase from 'firebase/app';
 import 'firebase/firestore';
@@ -63,19 +64,34 @@ export default {
 	},
 	
 	methods: {
-		save() {
+		...mapActions('trackers',
+			['add']
+		),
+
+		...mapActions('ratings', {
+				rate: 'add'
+			}
+		),
+
+		async save() {
 			this.isLoading = true;
 
-			let docRef = firebase.firestore().collection('trackers').doc(this.name)
-			let now = moment();
-			let docName = now.format('YYYYMMDD');
+			try {
+				let tracker = await this.add({
+					name: this.name,
+					user_id: this.$store.state.user.id
+				});
+	
+	
+				if (this.hasStartRating){
+					await this.rate({
+						value: this.startRating
+					});
+				}
 
-
-			if (this.hasStartRating){
-				docRef.collection('ratings').doc(docName).set({
-					value: this.startRating,
-					date: now.toDate()
-				}).then(this.success).catch(this.error);
+				this.success();
+			} catch (e){
+				this.error(e);
 			}
 			
 		},

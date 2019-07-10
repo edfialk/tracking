@@ -6,7 +6,9 @@ import 'firebase/firestore';
 import firebaseConfig from '../firebase.config';
 
 import things from './modules/things';
+import trackers from './modules/trackers';
 import ratings from './modules/ratings';
+
 
 firebase.initializeApp(firebaseConfig);
 Vue.use(Vuex)
@@ -37,7 +39,7 @@ export default new Vuex.Store({
     setStatus(state, payload) {
       state.status = payload;
     },
-    setError(state, payload) {
+    error(state, payload) {
       state.error = payload;
     },
     setTrackers(state, payload) {
@@ -54,24 +56,24 @@ export default new Vuex.Store({
 
       commit('setUser', state.db.auth().currentUser);
       commit('setStatus', 'success');
-      commit('setError', null);
+      commit('error', null);
     },
 
-    async getTrackers ({ commit, state }) {
-      try {
+    // async getTrackers ({ commit, state }) {
+    //   try {
 
-        let ref = state.db.collection('trackers').where('user_id', '==', 1);
-        let resp = await ref.get();
-        let trackers = resp.docs.map(t => t.id);
+    //     let ref = state.db.collection('trackers').where('user_id', '==', 1);
+    //     let resp = await ref.get();
+    //     let trackers = resp.docs.map(t => t.id);
 
-        commit('setTrackers', trackers);
+    //     commit('setTrackers', trackers);
 
-      } catch(e) {
-        console.log('error', e);
-        commit('setError', e);
-      }
+    //   } catch(e) {
+    //     console.log('error', e);
+    //     commit('error', e);
+    //   }
 
-    },
+    // },
 
   },
 

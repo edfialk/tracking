@@ -36,7 +36,7 @@ const actions = {
             commit('set_all', things);
 
         } catch (e) {
-            commit('setError', e, { root: true });
+            commit('error', e, { root: true });
             console.log(e);
         }
     },
@@ -49,7 +49,7 @@ const actions = {
                 commit('add', thing);
                 resolve();
             } catch (e) {
-                commit('setError', e, { root: true });
+                commit('error', e, { root: true });
                 console.log(e);
                 reject(e);
             }
@@ -63,7 +63,7 @@ const actions = {
                 commit('set', thing);
                 resolve(thing);
             } catch (e) {
-                commit('setError', e, {root: true });
+                commit('error', e, {root: true });
                 console.log(e);
                 reject(e);
             }
@@ -77,7 +77,7 @@ const actions = {
                 commit('delete', thing);
                 resolve();
             } catch (e) {
-                commit('setError', e, { root: true});
+                commit('error', e, { root: true});
                 console.log(e);
                 reject(e);
             }
