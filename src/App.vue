@@ -1,12 +1,12 @@
 <template>
   <main id="app" class="">
-    <Nav></Nav>
-      <transition
-        :name="transitionName"
-        mode="out-in"
-      >
-        <router-view />
-      </transition>
+    <!-- <Nav></Nav> -->
+    <transition
+      :name="transitionName"
+      mode="out-in"
+    >
+      <router-view />
+    </transition>
   </main>
 </template>
 
@@ -25,11 +25,9 @@ export default {
   },
 
   created() {
+    this.$store.dispatch('getUserData');
     this.$store.dispatch('things/get');
-    // this.$store.dispatch('ratings/get');
-    this.$store.dispatch('trackers/get');
-
-    console.log(this.$store.getters['ratings/getNextDoc']('adorableness'));
+    this.$store.dispatch('ratings/get');
 
     this.$router.beforeEach((to, from, next) => {
       if (to.path !== '/') {

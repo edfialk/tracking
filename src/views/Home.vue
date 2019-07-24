@@ -1,6 +1,8 @@
 <template>
     <div class="container pt-3">
 
+      <Chart :chartData="chartData" :regions="selectedThings" :xmin="xmin" :xmax="xmax"></Chart>
+
       <div class="mb-3">
         <router-link to="/rate" class="btn btn-lg btn-primary btn-block">Rate Yoself</router-link>
         <router-link to="/photo" class="btn btn-lg btn-primary btn-block">Selfie!</router-link>
@@ -8,7 +10,6 @@
         <router-link to="/tracker/add" class="btn btn-lg btn-primary btn-block">Track Something</router-link>
       </div>
 
-      <Chart :chartData="chartData" :regions="selectedThings"></Chart>
 
       <Things @toggleThing="toggleThing"></Things>
     </div>
@@ -16,7 +17,8 @@
 
 <script>
 
-import { mapState } from 'vuex';
+// import moment from 'moment';
+import { mapState, mapGetters } from 'vuex';
 import Things from '../components/Things';
 import Chart from '../components/Chart';
 
@@ -44,7 +46,7 @@ export default {
       }
 
       this.selectedThings.push({ thing, color });
-    }
+    },
 
   }, //methods
 
@@ -54,6 +56,8 @@ export default {
       ratings: 'all'
     }),
 
+    ...mapGetters('ratings', ['since', 'maxCountSince']),
+
     chartData() {
 
       let data = {
@@ -62,39 +66,45 @@ export default {
         columns: []
       };
 
-      let dates = {};
-      let ratings = {};
+      //get 7 days or 2 points
 
-      this.ratings.forEach(rating => {
-        let t = rating.tracker;
-        dates[t] = dates[t] || [];
-        ratings[t] = ratings[t] || [];
+			// let ratings = this.since(this.weekago);
+			let ratings = this.ratings;
 
-        dates[t].push(rating.date);
-        ratings[t].push(rating.rating);
-      });
+      for (let t in ratings) {
+				data.xs[t] = 'x' + t;
+				
+        let x = ['x' + t];
+        let y = [t];
 
-      for (let series in dates) {
-        data.xs[series] = 'x' + series;
-        data.columns.push([series, ...ratings[series]]);
-        data.columns.push(['x' + series, ...dates[series]]);
+        ratings[t].forEach(rating => {
+          x.push(rating.date);
+          y.push(rating.value);
+        });
+
+        data.columns.push(x, y);
       }
 
       return data;
 
-    },
+		},
+
+		xmax() {
+			return new Date();
+		},
+
+		xmin() {
+			return this.weekago;
+		},
+
+		weekago() {
+      let date = new Date();
+			date.setDate(date.getDate() - 7);
+			return date;
+		}
 
   }, //computed
 
 }
 
 </script>
-
-<style lang="scss" scoped>
-.table tr td+td {
-  text-align: right;
-}
-.table tr:hover {
-  cursor: pointer;
-}
-</style>

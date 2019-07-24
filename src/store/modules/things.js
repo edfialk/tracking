@@ -1,56 +1,77 @@
+import Vue from 'vue';
+
 const state = {
-    all: []
+    all: {},
+    status: null,
+    error: null
 };
 
 const getters = {
     active: state => {
-        return state.all.filter(thing => thing.active);
+        let resp = [];
+        for (let thing in state.all) {
+            if (state.all[thing].since) resp.push(thing);
+        }
+        return resp;
     },
 
     inactive: state => {
-        return state.all.filter(thing => !thing.active);
-    },
-
-    id: (state) => (id) => {
-        return state.all.find(t => t.id === id);
+        let resp = [];
+        for (let thing in state.all) {
+            if (!state.all[thing].since) resp.push(thing);
+        }
+        return resp;
     },
 
     name: (state) => (name) => {
-        return state.all.find(t => t.name === name);
+        return state.all ? state.all[name] : null;
     }
 };
 
 const actions = {
-    async get ({ commit, rootState }) {
-        try {
-
-            let query = rootState.db.collection('factors');
-            let resp = await query.get();
-            let things = resp.docs.map(doc => {
-                return {
-                    id: doc.id,
-                    ...doc.data()
-                };
-            });
-
-            commit('set_all', things);
-
-        } catch (e) {
-            commit('error', e, { root: true });
-            console.log(e);
-        }
+    get ({ commit, rootState }) {
+        return new Promise(async (resolve, reject) => {
+            try {
+                commit('status', 'loading');
+                let resp = await rootState.db.collection('factors').doc(rootState.user.uid).get();
+                let all = resp.data();
+                //convert firebase timestamps to date
+                for (let thing in all) {
+                    if (all[thing].dates && all[thing].dates.length > 0){
+                        all[thing].dates = all[thing].dates.map(range => {
+                            for (let time in range){
+                                if (range[time].toDate){
+                                    range[time] = range[time].toDate();
+                                }
+                            }
+                            return range;
+                        });
+                    }
+                    if (all[thing].since && all[thing].since.toDate) {
+                        all[thing].since = all[thing].since.toDate();
+                    }
+                }
+                commit('set', all);
+                commit('status', 'success');
+                resolve(all);
+            } catch (e) {
+                commit('error', e, { root: true });
+                reject(e);
+            }
+        });
     },
 
     add ({ commit, rootState }, thing) {
         return new Promise(async (resolve, reject) => {
             try {
-                let ref = await rootState.db.collection('factors').add(thing);
+                commit('status', 'loading');
+                let ref = await rootState.db.collection('factors').doc(rootState.user.uid).add(thing);
                 thing.id = ref.id;
                 commit('add', thing);
-                resolve();
+                commit('status', 'success');
+                resolve(thing);
             } catch (e) {
                 commit('error', e, { root: true });
-                console.log(e);
                 reject(e);
             }
         });
@@ -59,12 +80,13 @@ const actions = {
     save ({ commit, rootState }, thing) {
         return new Promise(async (resolve, reject) => {
             try {
-                await rootState.db.collection('factors').doc(thing.id).set(thing);
-                commit('set', thing);
+                let update = {};
+                update[thing.name] = thing;
+                await rootState.db.collection('factors').doc(rootState.user.uid).update(update);
+                commit('update', thing);
                 resolve(thing);
             } catch (e) {
                 commit('error', e, {root: true });
-                console.log(e);
                 reject(e);
             }
         });
@@ -77,8 +99,7 @@ const actions = {
                 commit('delete', thing);
                 resolve();
             } catch (e) {
-                commit('error', e, { root: true});
-                console.log(e);
+                commit('error', e, { root: true });
                 reject(e);
             }
         });
@@ -86,24 +107,25 @@ const actions = {
 };
 
 const mutations = {
-    set_all(state, things) {
-        state.all = things;
-    },
-
-    set(state, thing) {
-        let i = state.all.findIndex(t => t.id === thing.id);
-        state.all[i] = thing;
+    set(state, payload) {
+        Vue.set(state, 'all', payload);
     },
 
     add(state, thing) {
         state.all = [...state.all, thing];
     },
 
-    delete(state, payload) {
-        state.all = state.all.filter(t => t.id !== payload.id);
+    update(state, thing) {
+        state.all[thing.name] = thing;
     },
 
-
+    delete(state, payload) {
+        this.$delete(state.all, payload.name);
+    },
+    
+    status(state, payload) {
+        state.status = payload;
+    }
 };
 
 export default {

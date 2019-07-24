@@ -20,7 +20,8 @@ Vue.use(Datetime);
 Vue.component('datetime', Datetime);
 
 Vue.filter('date', value => {
-  return new Date(value).toLocaleDateString()
+  let date = value.toDate ? value.toDate() : new Date(value);
+  return date.toLocaleDateString()
 });
 
 Vue.config.productionTip = false;

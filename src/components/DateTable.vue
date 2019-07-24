@@ -4,29 +4,6 @@
     v-if="dates && dates.length > 0"
   >
 
-    <!-- <table class="table border-bottom">
-      <tbody>
-        <tr
-          v-for="(range, i) in dates"
-          :key="i"
-        >
-          <td
-            colspan="2"
-            v-if="range.date"
-            @click="onClickSingleDate(range, i)"
-          >{{ range.date | date }}</td>
-          <td
-            v-if="range.start"
-            @click="onClickStartDate(range, i)"
-          >{{ range.start | date }}</td>
-          <td
-            v-if="range.end"
-            @click="onClickEndDate(range, i)"
-          >{{ range.end | date }}</td>
-        </tr>
-      </tbody>
-    </table> -->
-
     <div class="card text-center">
       <div class="card-header">
         Use Dates
@@ -43,7 +20,6 @@
           <span v-if="range.end" @click="onClickEndDate(range, i)">
             {{ range.end | date }}
           </span>
-          <!-- {{ displayRange(range) }} -->
         </li>
       </ul>
     </div>
@@ -82,19 +58,20 @@ export default {
 
     onClickStartDate(range, index) {
       this.datePickerOptions = {
-        date: range.start,
+        date: this.toStr(range.start),
         min: null,
-        max: range.end,
+        max: this.toStr(range.end),
         index,
         prop: 'start'
       };
+      console.log(this.datePickerOptions);
       this.openDatePicker();
     },
 
     onClickEndDate(range, index) {
       this.datePickerOptions = {
-        date: range.end,
-        min: range.start,
+        date: this.toStr(range.end),
+        min: this.toStr(range.start),
         max: null,
         index,
         prop: 'end'
@@ -104,7 +81,7 @@ export default {
 
     onClickSingleDate(range, index) {
       this.datePickerOptions = {
-        date: range.date,
+        date: this.toStr(range.date),
         min: null,
         max: null,
         index,
@@ -123,13 +100,20 @@ export default {
       let i = this.datePickerOptions.index;
       let prop = this.datePickerOptions.prop;
 
-      this.dates[i][prop] = this.datePickerOptions.date;
+      this.dates[i][prop] = new Date(this.datePickerOptions.date);
 
       this.save();
     },
 
     save() {
       this.$emit('save', this.dates);
+    },
+
+    toStr(date) {
+      if (typeof date === "string"){
+        date = new Date(date);
+      }
+      return date.toISOString();
     },
 
   }

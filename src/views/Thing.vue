@@ -1,157 +1,166 @@
 <template>
 
-  <div
-    class="container h-100"
-    v-if="thing"
-  >
-    <div class="p-3 mb-3 bg-light rounded shadow text-center">
-      <h4 class="mb-0">
-        <span v-if="thing.active">You have been using {{ thing.name }} since {{ thing.since | date }}</span>
-        <span v-else>You last used {{ thing.name }} on {{ latestDate | date }}</span>
-      </h4>
-    </div>
+  <div class="container h-100">
 
-    <div class="mb-3">
-      <button
-        v-if="!thing.active"
-        type="btn"
-        class="btn btn-info btn-block"
-        data-toggle="modal"
-        data-target="#modal-start"
-      >Use {{ thing.name }}</button>
-      <button
-        v-if="thing.active"
-        type="btn"
-        class="btn btn-info btn-block"
-        @mouseup="stop"
-      >Stop using this thing</button>
-    </div>
+    <div v-if="thing">
 
-    <div class="mb-3 p-3 bg-light rounded shadow text-center">
-      <Chart :chartData="chartData" :xmin="xmin" :xmax="xmax" :regions="chartRegions"></Chart>
-    </div>
+      <div class="p-3 mb-3 bg-light rounded shadow text-center">
+        <h4 class="mb-0">
+          <span v-if="thing.since">You have been using {{ thing.name }} since {{ thing.since | date }}</span>
+          <span v-else>You last used {{ thing.name }} on {{ latestDate | date }}</span>
+        </h4>
+      </div>
 
-    <DateTable
-      :dates="thing.dates"
-      @save="setDates"
-      v-if="thing.dates && thing.dates.length > 0"
-    ></DateTable>
+      <div class="mb-3">
+        <button
+          v-if="!thing.since"
+          type="btn"
+          class="btn btn-info btn-block"
+          data-toggle="modal"
+          data-target="#modal-start"
+        >Use {{ thing.name }} now</button>
+        <button
+          v-if="thing.since"
+          type="btn"
+          class="btn btn-info btn-block"
+          @mouseup="stop"
+        >Stop using {{ thing.name }}</button>
+      </div>
 
-    <div class="mb-3">
-      <button
-        type="btn"
-        class="btn btn-info btn-block"
-        data-toggle="modal"
-        data-target="#modal-name"
-      >Change Name</button>
-      <button
-        type="btn"
-        class="btn btn-danger btn-block"
-        @click="onClickDelete"
-      >Delete this thing</button>
-    </div>
+      <div class="mb-3 p-3 bg-light rounded shadow text-center">
+        <Chart :chartData="chartData" :xmin="xmin" :xmax="xmax" :regions="chartRegions"></Chart>
+      </div>
 
-    <div
-      class="modal fade"
-      id="modal-name"
-      role="dialog"
-    >
+      <DateTable
+        :dates="thing.dates"
+        @save="setDates"
+        v-if="thing.dates && thing.dates.length > 0"
+      ></DateTable>
+
+      <div class="mb-3">
+        <button
+          type="btn"
+          class="btn btn-info btn-block"
+          data-toggle="modal"
+          data-target="#modal-name"
+        >Change Name</button>
+        <button
+          type="btn"
+          class="btn btn-danger btn-block"
+          @click="onClickDelete"
+        >Delete this thing</button>
+      </div>
+
       <div
-        class="modal-dialog"
-        role="document"
+        class="modal fade"
+        id="modal-name"
+        role="dialog"
       >
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title">Enter new name</h5>
-            <button
-              type="button"
-              class="close"
-              data-dismiss="modal"
-              aria-label="Close"
-            >
-              <span aria-hidden="true">&times;</span>
-            </button>
-          </div>
-          <div class="modal-body">
-            <form @submit.prevent="onSubmitName">
-              <input
-                type="text"
-                class="form-control"
-                v-model.trim="inputName"
-                ref="input-name"
-                autofocus
-              />
-            </form>
-            <div class="alert alert-danger mt-3" v-if="isNameTaken">
-              That name is already taken. Please use another.
+        <div
+          class="modal-dialog"
+          role="document"
+        >
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title">Enter new name</h5>
+              <button
+                type="button"
+                class="close"
+                data-dismiss="modal"
+                aria-label="Close"
+              >
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-body">
+              <form @submit.prevent="onSubmitName">
+                <input
+                  type="text"
+                  class="form-control"
+                  v-model.trim="inputName"
+                  ref="input-name"
+                  autofocus
+                />
+              </form>
+              <div class="alert alert-danger mt-3" v-if="isNameTaken">
+                That name is already taken. Please use another.
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button
+                type="button"
+                class="btn btn-primary"
+                @click="onSubmitName"
+              >Change Name</button>
+              <button
+                type="button"
+                class="btn btn-secondary"
+                data-dismiss="modal"
+              >Cancel</button>
             </div>
           </div>
-          <div class="modal-footer">
-            <button
-              type="button"
-              class="btn btn-primary"
-              @click="onSubmitName"
-            >Change Name</button>
-            <button
-              type="button"
-              class="btn btn-secondary"
-              data-dismiss="modal"
-            >Cancel</button>
+        </div>
+      </div>
+
+      <div
+        class="modal fade"
+        id="modal-start"
+        role="dialog"
+      >
+        <div
+          class="modal-dialog"
+          role="document"
+        >
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title">How are you using this?</h5>
+              <button
+                type="button"
+                class="close"
+                data-dismiss="modal"
+                aria-label="Close"
+              >
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-body">
+              <button
+                type="button"
+                class="btn btn-info btn-block mb-3"
+                @click="onClickUseOnce"
+              >Just once</button>
+              <button
+                type="button"
+                class="btn btn-info btn-block"
+                @click="onClickUseOngoing"
+              >Ongoing</button>
+            </div>
+            <div class="modal-footer">
+              <button
+                type="button"
+                class="btn btn-secondary"
+                data-dismiss="modal"
+              >Cancel</button>
+            </div>
           </div>
         </div>
       </div>
     </div>
 
-    <div
-      class="modal fade"
-      id="modal-start"
-      role="dialog"
-    >
-      <div
-        class="modal-dialog"
-        role="document"
-      >
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title">How are you using this?</h5>
-            <button
-              type="button"
-              class="close"
-              data-dismiss="modal"
-              aria-label="Close"
-            >
-              <span aria-hidden="true">&times;</span>
-            </button>
-          </div>
-          <div class="modal-body">
-            <button
-              type="button"
-              class="btn btn-info btn-block mb-3"
-              @click="onClickUseOnce"
-            >Just once</button>
-            <button
-              type="button"
-              class="btn btn-info btn-block"
-              @click="onClickUseOngoing"
-            >Ongoing</button>
-          </div>
-          <div class="modal-footer">
-            <button
-              type="button"
-              class="btn btn-secondary"
-              data-dismiss="modal"
-            >Cancel</button>
-          </div>
-        </div>
-      </div>
+    <div class="p-3 bg-light rounded shadow" v-if="loadStatus=='success' && !thing">
+      You don't have anything with that name. There might be a problem.
+      <a href="#" @click.prevent="$router.go(-1)">
+        You should go back.
+      </a>  
     </div>
 
   </div>
 
+
 </template>
 
 <script>
-import { mapState } from 'vuex';
+import { mapState, mapGetters } from 'vuex';
 import DateTable from '../components/DateTable';
 import jQuery from 'jquery';
 let $ = jQuery;
@@ -167,20 +176,33 @@ export default {
       showModal: false,
       inputName: '',
       isNameTaken: false,
+      notFound: false,
     };
   },
 
   created() {
-    this.thing = this.$store.getters['things/id'](this.$route.params.id);
+    this.thing = this.$store.getters['things/name'](this.$route.params.id);
+
+    let self = this;
 
     this.$store.watch(() => {
-      this.thing = this.$store.getters['things/id'](this.$route.params.id);
+      self.thing = self.$store.getters['things/name'](this.$route.params.id);
+
+      // if (!self.thing) self.notFound = true;
+      self.notFound = !self.thing;
+      // debugger;
     });
+
   },
 
   computed: {
-    ...mapState('ratings', {
-      ratings: 'all'
+
+    ...mapState('things', {
+      loadStatus: 'status'
+    }),
+
+    ...mapGetters('ratings', {
+      ratings: 'get'
     }),
 
     latestDate() {
@@ -191,7 +213,7 @@ export default {
         .sort((a, b) => {
           let x = a.end || a.date;
           let y = b.end || b.date;
-          return new Date(x) - new Date(y);
+          return x - y;
         })
         .pop();
       return date.end || date.date;
@@ -205,7 +227,7 @@ export default {
         .sort((a, b) => {
           let x = a.end || a.date;
           let y = b.end || b.date;
-          return new Date(y) - new Date(x);
+          return y - x;
         })
         .pop();
       return date.start || date.date;
@@ -214,7 +236,7 @@ export default {
     xmin() {
       if (!this.earliestDate) return null;
 
-      let date = new Date(this.earliestDate);
+      let date = this.earliestDate;
       date.setDate(date.getDate() - 1);
       return date;
     },
@@ -222,38 +244,37 @@ export default {
     xmax() {
       if (!this.latestDate) return null;
       
-      let date = new Date(this.latestDate);
+      let date = this.latestDate;
       date.setDate(date.getDate() + 1);
       return date;
     },
 
     chartData() {
+
       let data = {
         type: "spline",
         xs: {},
         columns: []
       };
 
+      if (!this.ratings) return data;
+
       let dates = {};
       let ratings = {};
 
-      this.ratings.forEach(rating => {
-        let t = rating.tracker;
-        if (!dates[t]) {
-          dates[t] = [];
-        }
-        if (!ratings[t]) {
-          ratings[t] = [];
-        }
 
-        dates[t].push(rating.date);
-        ratings[t].push(rating.rating);
-      });
+      for (let tracker in this.ratings) {
+        dates[tracker] = dates[tracker] || [];
+        ratings[tracker] = ratings[tracker] || [];
 
-      for (let series in dates) {
-        data.xs[series] = 'x' + series;
-        data.columns.push([series, ...ratings[series]]);
-        data.columns.push(['x' + series, ...dates[series]]);
+        this.ratings[tracker].forEach(rating => {
+          dates[tracker].push(rating.date);
+          ratings[tracker].push(rating.value);
+        });
+
+        data.xs[tracker] = 'x' + tracker;
+        data.columns.push(['x' + tracker, ...dates[tracker]]);
+        data.columns.push([tracker, ...ratings[tracker]]);
       }
 
       return data;
@@ -283,12 +304,11 @@ export default {
     stop() {
       this.thing.dates.push({
         start: this.thing.since,
-        end: new Date().toISOString()
+        end: new Date()
       });
-      this.thing.since = null;
       //need to wait before re-render or click gets fired on new button
       window.setTimeout(() => {
-        this.thing.active = false;
+        this.thing.since = null;
         this.save(false);
       }, 10);
     },
@@ -343,7 +363,6 @@ export default {
     onClickUseOngoing() {
       $("#modal-start").modal("hide");
       this.thing.since = new Date();
-      this.thing.active = true;
       this.save(false);
     }
   }

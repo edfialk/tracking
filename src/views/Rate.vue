@@ -7,8 +7,8 @@
                 </select>
             </div>
             <div class="shadow p-3 mb-3 bg-white rounded text-dark">
-                <div v-if="myRating.tracker">
-                    <h5>Last Rating: {{ lastRating.rating }}</h5>
+                <div v-if="lastRating">
+                    <h5>Last Rating: {{ lastRating.value }}</h5>
                     <h5>from {{ lastRating.date | date }}</h5>
                 </div>
                 <p class="mb-0">How bad is it now?</p>
@@ -31,7 +31,7 @@
             </div>
             <div class="form-group shadow p-3 mb-3 bg-white rounded">
                 <label for="inputRange">Or you can drag this thing</label>
-                <input type="range" class="form-control-range" id="inputRange" v-model="myRating.rating" min="1" max="10">
+                <input type="range" class="form-control-range" id="inputRange" v-model="myRating.value" min="0" max="10">
             </div>
             <div class="bg-danger text-light p-3 mb-3 shadow rounded" v-if="error">
                 {{ error }}
@@ -54,8 +54,8 @@ export default {
         return {
             myRating: {
                 tracker: '',
-                rating: 5,
-                date: null
+                value: 5,
+                date: new Date()
             },
             error: null,
             loading: false,
@@ -67,15 +67,12 @@ export default {
             ratings: 'all'
         }),
 
-        ...mapState('trackers', {
-            trackers: 'all'
-        }),
-
+        ...mapState(['trackers']),
 
         lastRating() {
-            if (this.ratings && this.ratings.length > 0){
-                return this.ratings.reduce((acc, cur) => {
-                    if (cur.tracker == this.myRating.tracker && cur.date > acc.date)
+            if (this.ratings && this.ratings[this.myRating.tracker]){
+                return this.ratings[this.myRating.tracker].reduce((acc, cur) => {
+                    if (cur.date > acc.date)
                         return cur;
                     return acc;
                 });
@@ -88,7 +85,7 @@ export default {
 
     methods: {
         modifyRating(change){
-            this.myRating.rating = this.lastRating.rating + change;
+            this.myRating.value = parseInt(this.lastRating.value) + change;
         },
 
         async save() {
@@ -109,22 +106,21 @@ export default {
     },
 
     created() {
-        if (this.trackers.length > 0) {
-            this.myRating.tracker = this.trackers[0];
-            this.myRating.rating = this.lastRating.rating;
+        if (this.$store.state.trackers && this.$store.state.trackers.length > 0){
+            this.myRating.tracker = this.$store.state.trackers[0];
+            this.myRating.value = this.lastRating.value;
         }
     },
 
     watch: {
         trackers(val) {
-            if (val.length) {
+            if (val && !this.myRating.tracker)
                 this.myRating.tracker = val[0];
-                this.myRating.rating = this.lastRating.rating;
-            }
         },
 
         'myRating.tracker'() {
-            this.myRating.rating = this.lastRating.rating;
+            if (this.lastRating) 
+                this.myRating.value = this.lastRating.value;
         }
     }
 

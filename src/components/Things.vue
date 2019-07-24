@@ -7,12 +7,12 @@
     <table class="table table-last-col-right">
       <tbody>
         <tr
-          v-for="thing in $store.getters['things/active']"
-          v-bind:key="thing.id"
+          v-for="(thing, index) in active"
+          v-bind:key="index"
         >
-          <td @click="onClickThing(thing, $event)">{{ thing.name }}</td>
+          <td @click="onClickThing(thing, $event)">{{ thing }}</td>
           <td>
-            <router-link :to="'/thing/' + thing.id">
+            <router-link :to="'/thing/' + thing">
               <span class="oi oi-chevron-right text-muted"></span>
             </router-link>
           </td>
@@ -25,12 +25,12 @@
     <table class="table table-last-col-right">
       <tbody>
         <tr
-          v-for="thing in $store.getters['things/inactive']"
+          v-for="thing in inactive"
           v-bind:key="thing.id"
         >
-          <td @click="onClickThing(thing, $event)">{{ thing.name }}</td>
+          <td @click="onClickThing(thing, $event)">{{ thing }}</td>
           <td>
-            <router-link :to="'/thing/' + thing.id">
+            <router-link :to="'/thing/' + thing">
               <span class="oi oi-chevron-right text-muted"></span>
             </router-link>
           </td>
@@ -43,7 +43,7 @@
 
 <script>
 
-import { mapState } from 'vuex';
+import { mapState, mapGetters } from 'vuex';
 
 export default {
 	
@@ -51,8 +51,8 @@ export default {
 		return {
       selected: []
 		};
-	},
-
+  },
+  
   methods: {
     onClickThing(thing, event) {
 			let tr = event.target.parentElement;
@@ -79,9 +79,14 @@ export default {
   computed: {
 
     ...mapState({
-      things: state => state.things.all,
+      things: state => state.things,
     }),
-    
+
+    ...mapGetters('things', [
+      'active',
+      'inactive'
+    ]),  
+
   }
 };
 </script>

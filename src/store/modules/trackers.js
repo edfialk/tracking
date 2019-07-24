@@ -1,10 +1,12 @@
+import Vue from 'vue';
+
 const state = {
     all: []
 };
 
 const getters = {
     named: (state) => (name) => {
-        return state.all.filter(tracker => tracker.name === name);
+        return state.all.find(tracker => tracker.name === name);
     },
     get: state => {
         return state.all;
@@ -27,7 +29,6 @@ const actions = {
                 resolve(all);
             } catch (e) {
                 commit('error', e, { root: true });
-                console.log(e);
                 reject(e);
             }
         });
@@ -36,13 +37,24 @@ const actions = {
     add ({ commit, rootState }, tracker) {
         return new Promise(async (resolve, reject) => {
             try {
-                let ref = await rootState.db.collection('trackers').add(tracker);
-                tracker.id = ref.id;
+
+                if (typeof tracker !== 'string'){
+                    commit('error', "Tracker should be string.", { root: true });
+                    reject("Tracker should be string.");
+                }
+
+                let trackers = state.all.slice() || [];
+                trackers.push(tracker);
+
+                let update = {};
+                update['trackers'] = trackers;
+
+                await rootState.db.collection('useres').doc(rootState.user.uid).update(update);
+
                 commit('add', tracker);
                 resolve(tracker);
             } catch (e) {
                 commit('error', e, { root: true });
-                console.log(e);
                 reject(e);
             }
         });
@@ -51,7 +63,7 @@ const actions = {
 
 const mutations = {
     set(state, payload) {
-        state.all = payload;
+        Vue.set(state, 'all', payload);
     },
 
     add(state, payload) {
