@@ -1,42 +1,32 @@
 <template>
 
-  <div class="box mb-3 box border rounded bg-light">
-    <div class="p-3 text-center">
-      <h5 class="mb-0">Stuff you are using now</h5>
+  <div class="py-3 things">
+    <div v-if="active.length > 0">
+      <h6>Using</h6>
+      <p class="text-muted small float-right">Click to highlight</p>
+      <div class="block" v-for="(thing, i) in active" :key="i">
+        {{ thing.name }}
+      </div>
     </div>
-    <table class="table table-last-col-right">
-      <tbody>
-        <tr
-          v-for="(thing, index) in active"
-          v-bind:key="index"
-        >
-          <td @click="onClickThing(thing, $event)">{{ thing }}</td>
-          <td>
-            <router-link :to="'/thing/' + thing">
-              <span class="oi oi-chevron-right text-muted"></span>
-            </router-link>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-    <div class="p-3 text-center">
-      <h5 class="mb-0">Stuff you ain't</h5>
+
+    <div v-if="inactive.length > 0">
+      <div class="flex">
+        <h5 class="text-left mb-0">Not Using</h5>
+        <p class="text-muted small text-right mb-0">Click name to highlight</p>
+      </div>
+      <div class="block flex bg-white" v-for="(thing, i) in inactive" :key="i">
+        <div class="flex-grow-1" @click="toggleThing(thing.name)">
+          <span class="title">{{ thing.name }}</span>
+          <p class="small mb-0">Last used {{ lastUsed(thing) }}</p>
+        </div>
+        <div class="color" :class="style(thing.name)"></div>
+        <div class="forward">
+          <router-link :to="'/thing/' + thing">
+            <span class="oi oi-chevron-right text-muted lead"></span>
+          </router-link>
+        </div>
+      </div>
     </div>
-    <table class="table table-last-col-right">
-      <tbody>
-        <tr
-          v-for="thing in inactive"
-          v-bind:key="thing.id"
-        >
-          <td @click="onClickThing(thing, $event)">{{ thing }}</td>
-          <td>
-            <router-link :to="'/thing/' + thing">
-              <span class="oi oi-chevron-right text-muted"></span>
-            </router-link>
-          </td>
-        </tr>
-      </tbody>
-    </table>
   </div>
 
 </template>
@@ -49,43 +39,50 @@ export default {
 	
 	data() {
 		return {
-      selected: []
+      colorIndex: 0,
+      colors: {},
 		};
   },
   
   methods: {
-    onClickThing(thing, event) {
-			let tr = event.target.parentElement;
-      let color;
+    toggleThing(name) {
 
-      if (!tr.classList.contains('active')){
-        color = this.getNextColorClass();
-        tr.classList.add('active', color);
-        this.selected.push({ tr, thing, color });
-      } else {
-        let t = this.selected.find(e => e.thing.name === thing.name);
-        tr.classList.remove('active', t.color);
-        this.selected = this.selected.filter(e => e.thing.name !== thing.name);
-      }
+      if (this.colors[name]){
+        this.colors[name] = null;
+        return;
+      } 
 
-      this.$emit('toggleThing', thing, color);
+      this.$set(this.colors, name, this.getNextColorClass());
+      this.colorIndex++;
+      if (this.colorIndex > 4) this.colorIndex = 0;
+
+      this.$emit('setRegions', this.colors);
     },
 
     getNextColorClass() {
-      return 'region-color--' + this.selected.length;
+      return 'region-color--' + this.colorIndex;
+    },
+
+    lastUsed(thing) {
+      return 'date';
+    },
+
+    style(name) {
+      if (this.colors[name]) return this.colors[name];
+      return "";
     }
   },
 
   computed: {
 
-    ...mapState({
-      things: state => state.things,
+    ...mapState('things', {
+      all: state => state.all,
     }),
 
     ...mapGetters('things', [
       'active',
       'inactive'
-    ]),  
+    ]),
 
   }
 };

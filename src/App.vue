@@ -1,12 +1,12 @@
 <template>
   <main id="app" class="">
-    <!-- <Nav></Nav> -->
     <transition
       :name="transitionName"
       mode="out-in"
     >
       <router-view />
     </transition>
+    <Nav :page="page"></Nav>
   </main>
 </template>
 
@@ -20,7 +20,8 @@ export default {
 
   data() {
     return {
-      transitionName: 'fade'
+      transitionName: 'fade',
+      page: 'home',
     }
   },
 
@@ -35,6 +36,10 @@ export default {
       } else {
         this.transitionName = 'slide-right';
       }
+
+      this.page = to.name;
+
+      console.log(to);
 
       next();
     })

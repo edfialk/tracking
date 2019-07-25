@@ -10,7 +10,7 @@ const getters = {
     active: state => {
         let resp = [];
         for (let thing in state.all) {
-            if (state.all[thing].since) resp.push(thing);
+            if (state.all[thing].since) resp.push(state.all[thing]);
         }
         return resp;
     },
@@ -18,7 +18,7 @@ const getters = {
     inactive: state => {
         let resp = [];
         for (let thing in state.all) {
-            if (!state.all[thing].since) resp.push(thing);
+            if (!state.all[thing].since) resp.push(state.all[thing]);
         }
         return resp;
     },

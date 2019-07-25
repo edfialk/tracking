@@ -1,9 +1,10 @@
 <template>
 
-    <nav class="navbar navbar-light mb-2">
-        <a class="navbar-brand" href="#" @click.prevent="$router.go(-1)" v-if="notHome">
-            <span class="oi oi-chevron-left text-gray" title="back" aria-hidden="true"></span>
-        </a>
+    <nav class="nav">
+        <router-link to="/" exact class="oi oi-home"></router-link>
+        <router-link to="/things" class="oi oi-list"></router-link>
+        <router-link to="/trackers" class="oi oi-graph"></router-link>
+        <router-link to="/selfie" class="oi oi-camera-slr"></router-link>
     </nav>
 
 
@@ -12,20 +13,10 @@
 <script>
 
 export default {
-    computed: {
-        notHome() {
-            return this.$route.path !== '/';
-        }
-    }
+
+    props: ["page"],
+
 }
+
 
 </script>
-
-<style>
-
-.navbar-light {
-    background-color: #e3f2fd;
-    height: 56px;
-}
-
-</style>

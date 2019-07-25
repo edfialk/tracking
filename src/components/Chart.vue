@@ -1,10 +1,11 @@
 <template>
-  <div class="bg-light p-1 rounded mb-3 text-center">
+  <div class="bg-light p-2 text-center rounded-top">
     <h5
       class="my-5"
       v-if="!hasData"
     >Add data to see this chart.</h5>
-    <div class="legend">
+    <div id="chart"></div>
+    <div class="legend pb-2">
       <span
         v-for="(color, series) in colors"
         :key="series"
@@ -14,7 +15,6 @@
         {{ series }}
       </span>
     </div>
-    <div id="chart"></div>
   </div>
 </template>
 
