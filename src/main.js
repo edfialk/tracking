@@ -19,6 +19,11 @@ Vue.use(Datetime);
 Vue.component('datetime', Datetime);
 
 Vue.filter('date', value => {
+  if (!value) return '';
+  
+  if (value.toLocaleDateString) 
+    return value.toLocaleDateString();
+
   let date = value.toDate ? value.toDate() : new Date(value);
   return date.toLocaleDateString()
 });

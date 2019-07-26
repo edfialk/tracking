@@ -1,5 +1,5 @@
 <template>
-  <div class="bg-light p-2 text-center rounded-top">
+  <div class="bg-light p-2 text-center">
     <h5
       class="my-5"
       v-if="!hasData"

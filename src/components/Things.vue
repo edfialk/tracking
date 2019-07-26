@@ -1,38 +1,42 @@
 <template>
 
   <div class="py-3 things">
-    <div v-if="active.length > 0">
-      <h6>Using</h6>
-      <p class="text-muted small float-right">Click to highlight</p>
-      <div class="block" v-for="(thing, i) in active" :key="i">
-        {{ thing.name }}
-      </div>
-    </div>
 
-    <div v-if="inactive.length > 0">
-      <div class="flex">
-        <h5 class="text-left mb-0">Not Using</h5>
-        <p class="text-muted small text-right mb-0">Click name to highlight</p>
-      </div>
-      <div class="block flex bg-white" v-for="(thing, i) in inactive" :key="i">
-        <div class="flex-grow-1" @click="toggleThing(thing.name)">
-          <span class="title">{{ thing.name }}</span>
-          <p class="small mb-0">Last used {{ lastUsed(thing) }}</p>
-        </div>
-        <div class="color" :class="style(thing.name)"></div>
-        <div class="forward">
-          <router-link :to="'/thing/' + thing">
-            <span class="oi oi-chevron-right text-muted lead"></span>
-          </router-link>
-        </div>
-      </div>
+    <div class="flex">
+      <!-- <h5>Factors</h5> -->
+      <p class="font-weight-bold">Factors</p>
+      <p class="small">Click name to show on graph.</p>
     </div>
+    <table class="table table-sm small">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th class="dropdown-toggle">Used</th>
+          <th>Color</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr v-for="thing in all" :key="thing.name">
+          <td @click="toggleThing(thing.name)">{{ thing.name }}</td>
+          <td>{{ lastUsed(thing) }}</td>
+          <td class="color" :class="colors[thing.name] || ''"></td>
+          <td class="text-right">
+            <router-link :to="'/thing/' + thing.name">
+              <span class="oi oi-chevron-right text-muted lead"></span>
+            </router-link>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
   </div>
 
 </template>
 
 <script>
 
+import * as moment from 'moment';
 import { mapState, mapGetters } from 'vuex';
 
 export default {
@@ -41,6 +45,7 @@ export default {
 		return {
       colorIndex: 0,
       colors: {},
+      dateCache: {},
 		};
   },
   
@@ -64,13 +69,30 @@ export default {
     },
 
     lastUsed(thing) {
-      return 'date';
+
+      if (this.dateCache[thing.name])
+        return this.dateCache[thing.name];
+
+      let res;
+      if (!thing.dates || thing.dates.length == 0) {
+        res = '';
+      } else if (thing.since) {
+        res = 'today';
+      } else {
+        res = thing.dates.reduce((acc, cur) => {
+          if (cur.end && cur.end > acc){
+            return cur.end;
+          } 
+          return acc;
+        }, thing.dates[0].end);
+        res = moment(res).fromNow();
+      }
+
+      this.dateCache[thing.name] = res;
+      return res;
+
     },
 
-    style(name) {
-      if (this.colors[name]) return this.colors[name];
-      return "";
-    }
   },
 
   computed: {

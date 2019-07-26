@@ -2,29 +2,28 @@
   <div>
 
 
-		<div class="header p-2 bg-blue">
-			<!-- <div class="ham">
-				<button class="ham--icon"></button>
-				<div class="ham--content">
-					<a href="">link</a>
-					<a href="">link</a>
-					<a href="">link</a>
-				</div>
-			</div> -->
+		<div class="fixed-top">
+			<div class="header p-2 bg-blue">
+				<!-- <div class="ham">
+					<button class="ham--icon"></button>
+					<div class="ham--content">
+						<a href="">link</a>
+						<a href="">link</a>
+						<a href="">link</a>
+					</div>
+				</div> -->
 
-			<div class="dropdown mx-auto">
-				<button
-					type="button"
-					data-toggle="dropdown"
-				>This Week</button>
-				<div class="dropdown-menu">
-					<button>This Month</button>
-					<button>This Year</button>
+				<div class="dropdown mx-auto">
+					<button
+						type="button"
+						data-toggle="dropdown"
+					>This Week</button>
+					<div class="dropdown-menu">
+						<button>This Month</button>
+						<button>This Year</button>
+					</div>
 				</div>
 			</div>
-		</div>
-
-		<div class="container bg-blue pb-3">
 
 			<Chart
 				:chartData="chartData"
@@ -33,84 +32,12 @@
 				:xmax="xmax"
 			></Chart>
 
-			<div class="border-top bg-grey rounded-bottom">
-				<button
-					class="btn btn-link text-dark text-decoration-none mx-auto d-block"
-					type="button"
-					data-toggle="collapse"
-					data-target="#things"
-					@click="toggleThings"
-					:class="showThingsDisplay ? 'active' : ''"
-				>
-					Show Tests
-				</button>
-				<div
-					class="collapse container bg-grey border-top"
-					id="things"
-				>
-					<Things @toggleThing="toggleThing"></Things>
-				</div>
-			</div>
 		</div>
 
+		<div class="container" style="margin-top: 262px">
+			<Things @toggleThing="toggleThing"></Things>
+		</div>
 
-				<router-link to="/rate" tag="div" class="block bg-blue text-light shadow">
-					<div class="d-flex align-items-center justify-content-start">
-						<div>
-							<span class="oi oi-bell h5 ml-1 mr-4"></span>
-						</div>
-						<div>
-							<h4>
-								Add a rating
-							</h4>
-							<p class="mb-0">How are you feeling today?</p>
-						</div>
-					</div>
-				</router-link>
-
-				<router-link to="/tracker/add" tag="div" class="block bg-blue text-light shadow">
-					<div class="d-flex align-items-center justify-content-start">
-						<div>
-							<span class="oi oi-bar-chart h5 ml-1 mr-4"></span>
-						</div>
-						<div>
-							<h4>
-								Start tracking
-							</h4>
-							<p class="mb-0">Another line for the graph.</p>
-						</div>
-					</div>
-				</router-link>
-
-				<router-link to="/thing/add" tag="div" class="block bg-blue text-light shadow">
-					<div class="d-flex align-items-center justify-content-start">
-						<div>
-							<span class="oi oi-book h5 ml-1 mr-4"></span>
-						</div>
-						<div>
-							<h4>
-								Record a Factor
-							</h4>
-							<p class="mb-0">New goop, vacation, anything.</p>
-						</div>
-					</div>
-				</router-link>
-
-				<router-link to="/photo" tag="div" class="block bg-blue text-light shadow">
-					<div class="d-flex align-items-center justify-content-start">
-						<div>
-							<span class="oi oi-camera-slr h5 ml-1 mr-4"></span>
-						</div>
-						<div>
-							<h4>
-								Selfie
-							</h4>
-							<p class="mb-0">This isn't working yet.</p>
-						</div>
-					</div>
-				</router-link>
-
-    </div>
   </div>
 </template>
 

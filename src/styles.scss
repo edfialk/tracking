@@ -11,8 +11,6 @@ html {
 body {
   display: flex;
   height: 100%;
-  // height: auto !important;
-  // height: 100%;
   margin: 0;
   font-family: 'Roboto', sans-serif;
 }
@@ -26,9 +24,17 @@ body {
   z-index: 0;
 }
 
+#app {
+  // flex: 1;
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  overflow-x: hidden
+}
+
 .bg-blue {
-  background: #7abcff;
-  background: linear-gradient(to bottom, #7abcff 0%,#60abf8 44%,#4096ee 100%);
+  background: #56CCF2;
+  background: linear-gradient(to right, #2F80ED, #56CCF2);
   background-repeat: no-repeat;
   background-attachment: fixed;
 }
@@ -41,11 +47,6 @@ body {
   @extend .d-flex, .justify-content-between, .align-items-center;
 }
 
-#app {
-  min-height: 100%;
-  flex: 1;
-}
-
 .ham {
   display: inline-block;
   .ham--icon {
@@ -53,9 +54,6 @@ body {
   }
   .ham--content {
     display: none;
-  }
-  a {
-
   }
 }
 
@@ -78,42 +76,60 @@ body {
 }
 
 .header {
-  background-color: inherit;
-
-  // @extend .d-flex, .justify-content-between;
   @extend .navbar;
-
-
+  // background-color: inherit;
 
   .dropdown {
     display: inline-block;
-    // @extend .nav-item;
-    // @extend .dropdown;
   }
 }
 
 .nav {
   height: 53px;
   @extend .h5;
-  @extend .navbar, .fixed-bottom, .navbar-light, .bg-light, .d-flex, .justify-content-around;
+  @extend .fixed-bottom, .navbar-light, .bg-white;
   @extend .border-top;
-  @extend .align-items-center;
+  .nav--inner {
+    @extend .d-flex, .justify-content-around, .align-items-center;
+    position: relative;
+    width: 100%;
+  }
   a {
     @extend .text-dark;
     text-decoration: none;
+
+    text-align: center;
+    &.router-link-active {
+      color: #007fff !important;
+      font-size: 1.5em;
+      transform: translateY(-3px);
+    }
   }
-  .router-link-active {
-    @extend .text-primary;
-    font-size: 1.5em;
-    transform: translateY(-3px);
+  a, div {
+    display: block;
+    flex: 1;
   }
+  .raised {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    top: -25px;
+    @extend .h6, .bg-success, .text-white, .m-0;
+    padding: 0.75rem;
+    width: 40px;
+    height: 41px;
+    border-radius: 50%;
+    z-index: 1100;
+    box-shadow: 0 0 0 10px #f8f9fa;
+    &.router-link-active {
+      display: none;
+    }
+  }
+  
 }
 
 .block {
   @extend .border, .rounded, , .pl-3, .pr-2, .py-2, .my-2;
-  // p {
-  //   @extend .mb-0;
-  // }
   a {
     @extend .font-weight-bold, .text-primary, .small;
   }
@@ -133,9 +149,8 @@ button.active {
 }
 
 .things .color {
-  width: 40px;
-  height: 40px;
-  @extend .mx-3;
+  width: 36px;
+  // height: 40px;
   &.active {
     @extend .border, .rounded;
   }
