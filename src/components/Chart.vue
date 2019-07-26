@@ -27,7 +27,7 @@ export default {
       type: Object
     },
     regions: {
-      type: Array
+      type: Object
     },
     xmin: {
       type: Date
@@ -81,7 +81,7 @@ export default {
         legend: {
           show: false
         }
-      }
+      },
     };
   },
 
@@ -96,30 +96,34 @@ export default {
 
     window.chart = this.chart;
 
-
-    /*
     if (this.xmin && this.xmax) {
       window.setTimeout(() => {
         this.chart.zoom([this.xmin, this.xmax]);
       }, 0);
-
-      // window.setTimeout(() => {
-      //   this.chart.zoom([new Date('May 23 2019'), new Date('June 12 2019')]);
-      // }, 10);
     }
-    */
 
-
-    if (this.regions) {
-      this.chart.regions(this.chartRegions.regions);
-      this.chart.xgrids(this.chartRegions.lines);
-    }
   },
 
   watch: {
-    regions() {
-      this.chart.regions(this.chartRegions.regions);
-      this.chart.xgrids(this.chartRegions.lines);
+    regions(val) {
+      if (!this.chart) return;
+
+      let r = [];
+      for (let i in val) {
+        const thing = val[i].thing;
+        if (!thing.dates || thing.dates.length == 0) continue;
+        r = r.concat(thing.dates.map(date => {
+          return {
+            axis: 'x',
+            start: date.start,
+            end: date.end,
+            class: val[i].color
+          };
+        }));
+      }
+
+      this.chart.regions(r);
+
     },
 
     chartData(val) {
@@ -133,59 +137,15 @@ export default {
     },
 
     xmin(val) {
-      // if (val && this.xmax) this.chart.zoom([val, this.xmax]);
+      if (val && this.xmax) this.chart.zoom([val, this.xmax]);
     },
 
-    xmax(val) {
-      // if (val && this.xmin) this.chart.zoom([this.xmin, val]);
-    }
+    // xmax(val) {
+    //   if (val && this.xmin) this.chart.zoom([this.xmin, val]);
+    // }
   },
 
   computed: {
-    chartRegions() {
-      return this.regions.reduce(
-        (acc, cur) => {
-          if (cur.thing.since) {
-            acc.regions.push({
-              axis: "x",
-              start: new Date(cur.thing.since),
-              class: cur.color
-            });
-            /* for adding line with text at beginning of regions */
-            // acc.lines.push({
-            //   value: new Date(cur.thing.since), class: cur.color, text: cur.thing.name
-            // });
-          }
-
-          if (cur.thing.dates && cur.thing.dates.length) {
-            cur.thing.dates.forEach(d => {
-              if (d.date) {
-                acc.lines.push({
-                  value: new Date(d.date),
-                  class: cur.color,
-                  text: cur.thing.name
-                });
-              } else {
-                acc.regions.push({
-                  axis: "x",
-                  start: new Date(d.start),
-                  end: new Date(d.end),
-                  class: cur.color
-                });
-                /* for adding line with text at beginning of regions */
-                // acc.lines.push({
-                //   value: new Date(d.start), class: cur.color, text: cur.thing.name
-                // });
-              }
-            });
-          }
-
-          return acc;
-        },
-        { lines: [], regions: [] }
-      );
-    },
-
     hasData() {
       return this.chartData.columns && this.chartData.columns.length > 0;
     },

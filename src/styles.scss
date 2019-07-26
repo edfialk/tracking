@@ -75,6 +75,12 @@ body {
   }
 }
 
+select.transparent {
+  background: none;
+  border: 0;
+  @extend .text-dark;
+}
+
 .header {
   @extend .navbar;
   // background-color: inherit;
@@ -149,7 +155,9 @@ button.active {
 }
 
 .things .color {
-  width: 36px;
+  // width: 36px;
+  // height: 36px;
+  opacity: 0.7;
   // height: 40px;
   &.active {
     @extend .border, .rounded;
@@ -159,37 +167,27 @@ button.active {
 
 
 .c3-region {
-  fill-opacity: 0.3 !important;
+  fill-opacity: 0.7 !important;
 }
 .region-color--0 {
-  background-color: #E7717D !important;
+  background-color: #007bff;
+  fill: #007bff !important;
 }
-// .c3-region.region-color--0 {
-//   fill: #E7717D;
-// }
 .region-color--1 {
-  background-color: #C2CAD0;
-}
-.c3-region.region-color--1 {
-  fill: #C2CAD0;
+  background-color: #6c757d;
+  fill: #6c757d !important;
 }
 .region-color--2 {
-  background-color:#C2B9B0;
-}
-.c3-region.region-color--2 {
-  fill: #C2B9B0;
+  background-color:#28a745;
+  fill: #28a745 !important;
 }
 .region-color--3 {
-  background-color: #7E685A;
-}
-.c3-region.region-color--3 {
-  fill: #7E685A;
+  background-color: #ffc107;
+  fill: #ffc107 !important;
 }
 .region-color--4 {
-  background-color: #AFD275;
-}
-.c3-region.region-color--4 {
-  fill: #AFD275;
+  background-color: #17a2b8;
+  fill: #17a2b8 !important;
 }
 
 .spinner {

@@ -14,20 +14,26 @@
 				</div> -->
 
 				<div class="dropdown mx-auto">
-					<button
+					<!-- <button
 						type="button"
 						data-toggle="dropdown"
-					>This Week</button>
+					>{{ timerange }}</button>
 					<div class="dropdown-menu">
+						<button>This Week</button>
 						<button>This Month</button>
 						<button>This Year</button>
-					</div>
+					</div> -->
+					<select v-model="timerange" class="transparent">
+						<option value="week">This Week</option>
+						<option value="month">This Month</option>
+						<option value="year">This Year</option>
+					</select>
 				</div>
 			</div>
 
 			<Chart
 				:chartData="chartData"
-				:regions="selectedThings"
+				:regions="regions"
 				:xmin="xmin"
 				:xmax="xmax"
 			></Chart>
@@ -35,14 +41,14 @@
 		</div>
 
 		<div class="container" style="margin-top: 262px">
-			<Things @toggleThing="toggleThing"></Things>
+			<Things @setRegions="setRegions"></Things>
 		</div>
 
   </div>
 </template>
 
 <script>
-// import moment from 'moment';
+import moment from 'moment';
 import { mapState, mapGetters } from "vuex";
 import Things from "../components/Things";
 import Chart from "../components/Chart";
@@ -54,27 +60,38 @@ export default {
 
   data() {
     return {
-      selectedThings: [],
-      showThingsDisplay: false
+			regions: {},
+			timerange: 'week',
+			ranges: {},
+			xmin: null,
     };
   },
 
+	created() {
+		this.$set(this, 'ranges', {
+			week: moment().subtract(1, 'week').toDate(),
+			month: moment().subtract(1, 'month').toDate(),
+			year: moment().subtract(1, 'year').toDate(),
+		});
+
+		this.xmin = this.ranges.week;
+	},
+
   methods: {
-    toggleThing(thing, color) {
-      let i = this.selectedThings.findIndex(e => e.thing.id === thing.id);
 
-      if (i >= 0) {
-        this.selectedThings.splice(i, 1);
-        return;
-      }
-
-      this.selectedThings.push({ thing, color });
+		setRegions(colors) {
+			// this.$set(this, 'regions', colors);
+			this.regions = colors;
 		},
-		
-		toggleThings() {
-			this.showThingsDisplay = !this.showThingsDisplay;
-		}
+
+	
   }, //methods
+
+	watch: {
+		timerange(val) {
+			this.xmin = this.ranges[val];
+		}
+	},
 
   computed: {
     ...mapState("ratings", {
@@ -116,19 +133,6 @@ export default {
       return new Date();
     },
 
-    xmin() {
-      return this.weekago;
-    },
-
-    weekago() {
-      let date = new Date();
-      date.setDate(date.getDate() - 7);
-      return date;
-    },
-
-    toggleThingsText() {
-      return this.showThingsDisplay ? "hide" : "display factors";
-    }
   } //computed
 };
 </script>

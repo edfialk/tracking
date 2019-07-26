@@ -20,7 +20,7 @@
         <tr v-for="thing in all" :key="thing.name">
           <td @click="toggleThing(thing.name)">{{ thing.name }}</td>
           <td>{{ lastUsed(thing) }}</td>
-          <td class="color" :class="colors[thing.name] || ''"></td>
+          <td class="color" :class="selected[thing.name] ? selected[thing.name].color : ''"></td>
           <td class="text-right">
             <router-link :to="'/thing/' + thing.name">
               <span class="oi oi-chevron-right text-muted lead"></span>
@@ -44,24 +44,28 @@ export default {
 	data() {
 		return {
       colorIndex: 0,
-      colors: {},
-      dateCache: {},
+      selected: {},
+      dates: {},
 		};
   },
   
   methods: {
     toggleThing(name) {
 
-      if (this.colors[name]){
-        this.colors[name] = null;
+      if (this.selected[name]){
+        this.$delete(this.selected, name);
         return;
       } 
 
-      this.$set(this.colors, name, this.getNextColorClass());
-      this.colorIndex++;
-      if (this.colorIndex > 4) this.colorIndex = 0;
+      this.$set(this.selected, name, {
+        color: this.getNextColorClass(),
+        thing: this.all[name]
+      });
 
-      this.$emit('setRegions', this.colors);
+      this.colorIndex++;
+
+      if (this.colorIndex > 4)
+        this.colorIndex = 0;
     },
 
     getNextColorClass() {
@@ -70,8 +74,8 @@ export default {
 
     lastUsed(thing) {
 
-      if (this.dateCache[thing.name])
-        return this.dateCache[thing.name];
+      if (this.dates[thing.name])
+        return this.dates[thing.name];
 
       let res;
       if (!thing.dates || thing.dates.length == 0) {
@@ -88,7 +92,7 @@ export default {
         res = moment(res).fromNow();
       }
 
-      this.dateCache[thing.name] = res;
+      this.dates[thing.name] = res;
       return res;
 
     },
@@ -106,6 +110,12 @@ export default {
       'inactive'
     ]),
 
+  },
+
+  watch: {
+    selected(val) {
+      this.$emit('setRegions', val);
+    }
   }
 };
 </script>
