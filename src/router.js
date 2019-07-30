@@ -32,7 +32,7 @@ let router = new Router({
       props: true,
     },
     {
-      path: '/rate/',
+      path: '/rate',
       name: 'rate',
       component: () => import(/* webpackChunkName: "rate" */ './views/Rate.vue')
     },
@@ -42,9 +42,19 @@ let router = new Router({
       component: () => import(/* webpackChunkName: "kitty" */ './views/Kitty.vue')
     },
     {
+      path: '/trackers',
+      name: 'trackers',
+      component: () => import(/* webpackChunkName: "trackers" */ './views/Trackers.vue')
+    },
+    {
       path: '/tracker/add',
       name: 'add-tracker',
       component: () => import(/* webpackChunkName: "tracker" */ './views/AddTracker.vue')
+    },
+    {
+      path: '/things',
+      name: 'things',
+      component: () => import(/* webpackChunkName: "things" */ './views/Things.vue')
     }
   ]
 })

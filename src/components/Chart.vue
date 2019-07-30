@@ -10,7 +10,7 @@
         v-for="(color, series) in colors"
         :key="series"
         :style="'background-color:' + color"
-        class="text-white py-1 px-2 rounded-pill small"
+        class="text-white py-1 px-2 rounded-pill small mx-1"
       >
         {{ series }}
       </span>
@@ -52,7 +52,10 @@ export default {
             tick: {
               count: 8,
               format: "%a", //'%m-%d'
-              fit: true
+              fit: true,
+              culling: {
+                max: 6
+              }
             },
             min: this.xmin,
             max: this.xmax
@@ -94,7 +97,11 @@ export default {
 
     this.chart = c3.generate(this.options);
 
-    window.chart = this.chart;
+    // window.chart = this.chart;
+
+    if (this.regions) {
+      this.setRegions(this.regions);
+    }
 
     if (this.xmin && this.xmax) {
       window.setTimeout(() => {
@@ -104,26 +111,41 @@ export default {
 
   },
 
-  watch: {
-    regions(val) {
+  methods: {
+    setRegions(regions) {
       if (!this.chart) return;
 
       let r = [];
-      for (let i in val) {
-        const thing = val[i].thing;
-        if (!thing.dates || thing.dates.length == 0) continue;
-        r = r.concat(thing.dates.map(date => {
-          return {
+      for (let i in regions) {
+        const thing = regions[i].thing;
+        if (thing.dates && thing.dates.length) {
+          r = r.concat(thing.dates.map(date => {
+            return {
+              axis: 'x',
+              start: date.start,
+              end: date.end,
+              class: regions[i].color
+            };
+          }));
+        }
+        if (thing.since) {
+          r.push({
             axis: 'x',
-            start: date.start,
-            end: date.end,
-            class: val[i].color
-          };
-        }));
+            start: thing.since,
+            end: new Date(),
+            class: regions[i].color
+          });
+        }
       }
 
       this.chart.regions(r);
 
+    }
+  },
+
+  watch: {
+    regions(val) {
+      this.setRegions(val);
     },
 
     chartData(val) {
@@ -137,7 +159,10 @@ export default {
     },
 
     xmin(val) {
-      if (val && this.xmax) this.chart.zoom([val, this.xmax]);
+      if (val && this.xmax){
+        this.chart.zoom([val, this.xmax]);
+
+      }
     },
 
     // xmax(val) {

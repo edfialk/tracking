@@ -6,7 +6,7 @@
 
     <div class="card text-center">
       <div class="card-header">
-        Use Dates
+        Dates of Use
       </div>
       <ul class="list-group list-group-flush">
         <li class="list-group-item" v-for="(range, i) in dates" :key="i">

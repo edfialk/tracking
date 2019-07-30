@@ -49,19 +49,19 @@
             type="button"
             class="btn"
             :class="{ 
-              'btn-success shadow' : thing.active,
-              'btn-light'   : !thing.active,
+              'btn-success shadow' : active,
+              'btn-light'   : !active,
             }"
-            @click="thing.active = true"
+            @click="active = true"
           >Yes</button>
           <button
             type="button"
             class="btn"
             :class="{
-              'btn-success shadow' : !thing.active,
-              'btn-light'   : thing.active,
+              'btn-success shadow' : !active,
+              'btn-light'   : active,
             }"
-            @click="thing.active = false"
+            @click="active = false"
           >No</button>
         </div>
       </div>
@@ -83,7 +83,7 @@
 
       <div
         class="form-group"
-        v-if="!isSingleUse && thing.active"
+        v-if="!isSingleUse && active"
       >
         <label>When did you start?</label>
         <datetime
@@ -97,7 +97,7 @@
 
       <div
         class="form-group"
-        v-if="!isSingleUse && !thing.active"
+        v-if="!isSingleUse && !active"
       >
         <label>When did you start?</label>
         <datetime
@@ -112,7 +112,7 @@
 
       <div
         class="form-group"
-        v-if="!isSingleUse && !thing.active"
+        v-if="!isSingleUse && !active"
       >
         <label>When did you stop?</label>
         <datetime
@@ -132,12 +132,12 @@
         {{ error }}
       </div>
 
-      <div
+      <router-link :to="takenNameURL" tag="div"
         class="bg-danger text-light p-3 mb-3 shadow rounded"
         v-if="isNameTaken"
       >
-        That name is already taken. Click <router-link :to="takenNameURL">here</router-link> to edit that thing.
-      </div>
+        That name is already taken. Click this box if you want to see it.
+      </router-link>
 
 
       <div class="form-group">
@@ -164,14 +164,8 @@ export default {
     return {
       thing: {
         name: "",
-        active: true,
-        // dates: [{
-        //   start: null,
-        //   end: null,
-        //   date: null
-        // }],
-        // since: null
       },
+      active: true,
       start: null,
       end: null,
       date: null,
@@ -194,19 +188,19 @@ export default {
         return false;
       }
 
-      if (!this.isSingleUse && this.thing.active && !this.thing.since) {
+      if (!this.isSingleUse && this.active && !this.thing.since) {
         this.error = "You need to set a start date.";
         // this.$refs['startDate'].focus();
         return false;        
       }
 
-      if (!this.isSingleUse && !this.thing.active && !this.start) {
+      if (!this.isSingleUse && !this.active && !this.start) {
         this.error = "You need to set a start date.";
         // this.$refs['startDate'].focus();
         return false;        
       }
       
-      if (!this.isSingleUse && !this.thing.active && !this.end) {
+      if (!this.isSingleUse && !this.active && !this.end) {
         this.error = "You need to set an end date.";
         // this.$refs['endDate'].focus();
         return false;
@@ -225,15 +219,15 @@ export default {
 
       if (!this.validate) return;
 
-      if (this.thing.active) {
-        this.thing.since = this.since;
+      if (this.active) {
+        this.thing.since = new Date(this.since);
       } else {
         let date = {};
         if (this.isSingleUse) {
-          date.date = this.date;
+          date.date = new Date(this.date);
         } else {
-          date.start = this.start;
-          date.end = this.end;
+          date.start = new Date(this.start);
+          date.end = new Date(this.end);
         }
 
         this.thing.date = [date];
@@ -243,7 +237,7 @@ export default {
 
         this.loading = true;
 
-        await this.$store.dispatch('things/add', this.thing, { root: true });
+        await this.$store.dispatch('things/add', this.thing);
 
         this.loading = false;
         this.$router.push('/kitty');
@@ -255,10 +249,10 @@ export default {
     },
 
     onNameChange() {
-      let t = this.$store.state.things.all.find(e => e.name == this.thing.name);
+      let t = this.$store.getters['things/name'](this.thing.name);
       if (t) {
         this.isNameTaken = true;
-        this.takenNameURL = '/thing/' + t.id;
+        this.takenNameURL = '/thing/' + t.name;
       }
     }
   },
@@ -273,7 +267,7 @@ export default {
       }
     },
 
-    'thing.active'(val) {
+    active(val) {
       if (val) {
         this.end = null;
         this.end = null;

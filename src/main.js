@@ -15,17 +15,23 @@ import 'vue-datetime/dist/vue-datetime.css';
 import 'd3';
 import 'c3/c3.min.css';
 
+import * as moment from 'moment';
+
 Vue.use(Datetime);
 Vue.component('datetime', Datetime);
 
 Vue.filter('date', value => {
   if (!value) return '';
-  
+
   if (value.toLocaleDateString) 
     return value.toLocaleDateString();
 
   let date = value.toDate ? value.toDate() : new Date(value);
   return date.toLocaleDateString()
+});
+
+Vue.filter('ago', (value, suffix) => {
+  return moment(value).fromNow(suffix);
 });
 
 Vue.config.productionTip = false;

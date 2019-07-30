@@ -4,7 +4,7 @@
       :name="transitionName"
       mode="out-in"
     >
-      <router-view />
+      <router-view style="padding-bottom: 80px"/>
     </transition>
     <Nav></Nav>
   </main>
@@ -37,7 +37,7 @@ export default {
       }
 
       next();
-    })
+    });
 
   },
 

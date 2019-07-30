@@ -2,11 +2,7 @@
 
   <div class="py-3 things">
 
-    <div class="flex">
-      <!-- <h5>Factors</h5> -->
-      <p class="font-weight-bold">Factors</p>
-      <p class="small">Click name to show on graph.</p>
-    </div>
+    <p class="small">Click name to toggle on graph.</p>
     <table class="table table-sm small">
       <thead>
         <tr>
@@ -49,6 +45,12 @@ export default {
 		};
   },
   
+  mounted() {
+    for (let t in this.all){
+      this.toggleThing(t);
+    }
+  },
+
   methods: {
     toggleThing(name) {
 
@@ -78,10 +80,10 @@ export default {
         return this.dates[thing.name];
 
       let res;
-      if (!thing.dates || thing.dates.length == 0) {
-        res = '';
-      } else if (thing.since) {
+      if (thing.since) {
         res = 'today';
+      } else if (!thing.dates || thing.dates.length == 0) {
+        res = '';
       } else {
         res = thing.dates.reduce((acc, cur) => {
           if (cur.end && cur.end > acc){
@@ -115,6 +117,12 @@ export default {
   watch: {
     selected(val) {
       this.$emit('setRegions', val);
+    },
+
+    all(val) {
+      for (let t in val) {
+        this.toggleThing(t);
+      }
     }
   }
 };

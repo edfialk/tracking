@@ -2,7 +2,7 @@
 
     <nav class="nav">
         <div class="nav--inner">
-            <router-link to="/rate" class="raised">
+            <router-link :to="action" class="raised">
                 <span class="oi oi-plus"></span>
             </router-link>
             <router-link to="/" exact class="oi oi-home"></router-link>
@@ -14,3 +14,25 @@
     </nav>
 
 </template>
+
+
+<script>
+
+export default {
+    computed: {
+        action() {
+            switch (this.$route.name) {
+                case 'things':
+                case 'add-thing':
+                    return '/thing/add';
+                case 'trackers':
+                case 'add-tracker':
+                    return '/tracker/add';            
+                default:
+                    return '/rate';
+            }
+        }
+    }
+}
+
+</script>

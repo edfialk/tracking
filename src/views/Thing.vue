@@ -1,21 +1,21 @@
 <template>
 
-  <div class="container h-100">
+  <div class="container bg-grey pt-3">
 
     <div v-if="thing">
 
       <div class="p-3 mb-3 bg-light rounded shadow text-center">
-        <h4 class="mb-0">
-          <span v-if="thing.since">You have been using {{ thing.name }} since {{ thing.since | date }}</span>
-          <span v-else>You last used {{ thing.name }} on {{ latestDate | date }}</span>
-        </h4>
+        <h5 class="mb-0">
+          <span v-if="thing.since">You have been using {{ thing.name }} for {{ thing.since | ago(true) }}.</span>
+          <span v-else>You last used {{ thing.name }} {{ latestDate | ago }}</span>
+        </h5>
       </div>
 
       <div class="mb-3">
         <button
           v-if="!thing.since"
           type="btn"
-          class="btn btn-info btn-block"
+          class="btn btn-info btn-block shadow"
           data-toggle="modal"
           data-target="#modal-start"
         >Use {{ thing.name }} now</button>
@@ -43,12 +43,12 @@
           class="btn btn-info btn-block"
           data-toggle="modal"
           data-target="#modal-name"
-        >Change Name</button>
+        >Rename {{ thing.name }}</button>
         <button
           type="btn"
           class="btn btn-danger btn-block"
           @click="onClickDelete"
-        >Delete this thing</button>
+        >Stop tracking {{ thing.name }}</button>
       </div>
 
       <div
@@ -156,7 +156,6 @@
 
   </div>
 
-
 </template>
 
 <script>
@@ -190,7 +189,6 @@ export default {
 
       // if (!self.thing) self.notFound = true;
       self.notFound = !self.thing;
-      // debugger;
     });
 
   },
@@ -281,7 +279,12 @@ export default {
     },
 
     chartRegions() {
-      return [{ thing: this.thing, color: 'region-color--0' }];
+      let o = {};
+      o[this.thing.name] = {
+        thing: this.thing,
+        color: 'region-color--3'
+      };
+      return o;
     },
 
   },
@@ -291,7 +294,7 @@ export default {
     async save(forward = true) {
       try {
         this.loading = true;
-        await this.$store.dispatch('things/save', this.thing, { root: true });
+        await this.$store.dispatch('things/save', this.thing);
         this.loading = false;
         if (forward)
           this.$router.push('/kitty');
@@ -316,7 +319,7 @@ export default {
     async delete() {
       try {
         this.loading = true;
-        await this.$store.dispatch('things/delete', this.thing, { root: true });
+        await this.$store.dispatch('things/delete', this.thing);
         this.loading = false;
         this.$router.push("/");
       } catch (e) {
@@ -349,9 +352,15 @@ export default {
 
       if (this.inputName.length == 0) return;
 
+      let oldName = this.thing.name;
       this.thing.name = this.inputName;
       this.inputName = "";
       this.save(false);
+
+      this.$store.dispatch('things/delete', { name: oldName });
+
+      this.$router.push('/thing/' + this.thing.name);
+
     },
 
     onClickUseOnce() {

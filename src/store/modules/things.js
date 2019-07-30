@@ -1,4 +1,6 @@
 import Vue from 'vue';
+import firebase from 'firebase/app';
+import 'firebase/firestore';
 
 const state = {
     all: {},
@@ -64,11 +66,10 @@ const actions = {
     add ({ commit, rootState }, thing) {
         return new Promise(async (resolve, reject) => {
             try {
-                commit('status', 'loading');
-                let ref = await rootState.db.collection('factors').doc(rootState.user.uid).add(thing);
-                thing.id = ref.id;
-                commit('add', thing);
-                commit('status', 'success');
+                let update = {};
+                update[thing.name] = thing;
+                await rootState.db.collection('factors').doc(rootState.user.uid).update(update);
+                commit('update', thing);
                 resolve(thing);
             } catch (e) {
                 commit('error', e, { root: true });
@@ -95,7 +96,9 @@ const actions = {
     delete ({ commit, rootState}, thing) {
         return new Promise(async (resolve, reject) => {
             try {
-                await rootState.db.collection('factors').doc(thing.id).delete();
+                let update = {};
+                update[thing.name] = firebase.firestore.FieldValue.delete();
+                await rootState.db.collection('factors').doc(rootState.user.uid).update(update);
                 commit('delete', thing);
                 resolve();
             } catch (e) {
@@ -111,16 +114,16 @@ const mutations = {
         Vue.set(state, 'all', payload);
     },
 
-    add(state, thing) {
-        state.all = [...state.all, thing];
-    },
+    // add(state, thing) {
+    //     state.all[thing.name] = thing;
+    // },
 
     update(state, thing) {
         state.all[thing.name] = thing;
     },
 
     delete(state, payload) {
-        this.$delete(state.all, payload.name);
+        Vue.delete(state.all, payload.name);
     },
     
     status(state, payload) {

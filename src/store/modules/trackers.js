@@ -49,7 +49,7 @@ const actions = {
                 let update = {};
                 update['trackers'] = trackers;
 
-                await rootState.db.collection('useres').doc(rootState.user.uid).update(update);
+                await rootState.db.collection('users').doc(rootState.user.uid).update(update);
 
                 commit('add', tracker);
                 resolve(tracker);
