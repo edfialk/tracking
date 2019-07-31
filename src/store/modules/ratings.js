@@ -11,6 +11,9 @@ const getters = {
     tracker: (state) => (tracker) => {
         return state.all ? state.all[tracker] : null;
     },
+    trackers: (state) => {
+        return Object.keys(state.all);
+    },
     since: (state) => (date) => {
         let res = {};
         for (let t in state.all) {

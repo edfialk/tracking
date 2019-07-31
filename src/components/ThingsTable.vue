@@ -103,9 +103,7 @@ export default {
 
   computed: {
 
-    ...mapState('things', {
-      all: state => state.all,
-    }),
+    ...mapState('things', ['all']),
 
     ...mapGetters('things', [
       'active',
@@ -120,6 +118,7 @@ export default {
     },
 
     all(val) {
+      if (!val) return;
       for (let t in val) {
         this.toggleThing(t);
       }

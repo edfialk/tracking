@@ -38,6 +38,7 @@ const actions = {
                 let resp = await rootState.db.collection('factors').doc(rootState.user.uid).get();
                 let all = resp.data();
                 //convert firebase timestamps to date
+                // debugger;
                 for (let thing in all) {
                     if (all[thing].dates && all[thing].dates.length > 0){
                         all[thing].dates = all[thing].dates.map(range => {

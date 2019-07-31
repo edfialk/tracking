@@ -6,7 +6,7 @@
     >
       <router-view style="padding-bottom: 80px"/>
     </transition>
-    <Nav></Nav>
+    <Nav v-if="signedIn"></Nav>
   </main>
 </template>
 
@@ -25,7 +25,7 @@ export default {
   },
 
   created() {
-    this.$store.dispatch('getUserData');
+    // this.$store.dispatch('getUserData');
     this.$store.dispatch('things/get');
     this.$store.dispatch('ratings/get');
 
@@ -40,6 +40,12 @@ export default {
     });
 
   },
+
+  computed: {
+    signedIn() {
+      return this.$store.state.user !== null;
+    }
+  }
 
 }
 

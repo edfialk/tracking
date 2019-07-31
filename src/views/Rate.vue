@@ -1,5 +1,5 @@
 <template>
-     <div class="container h-100 pt-3 text-center">
+     <div class="container h-100 pt-3 text-center" id="view--rate">
         <div v-if="myRating.tracker">
             <div class="form-group">
                 <select class="form-control" id="trackerSelect" v-model="myRating.tracker">
@@ -9,24 +9,24 @@
             <div class="shadow p-3 mb-3 bg-white rounded text-dark">
                 <div v-if="lastRating">
                     <h5>Last Rating: {{ lastRating.value }}</h5>
-                    <h5>from {{ lastRating.date | date }}</h5>
+                    <h5>from {{ lastRating.date | ago }}</h5>
                 </div>
                 <p class="mb-0">How bad is it now?</p>
             </div>
             <div class="row mb-3">
                 <div class="col">
-                    <button class="btn btn-block btn-success shadow" @click="modifyRating(1)">A little better</button>
+                    <button class="btn btn-block btn-success shadow py-3" @click="modifyRating(1)">A little better</button>
                 </div>
                 <div class="col">
-                    <button class="btn btn-block btn-danger shadow" @click="modifyRating(-1)">A little worse</button>
+                    <button class="btn btn-block btn-danger shadow py-3" @click="modifyRating(-1)">A little worse</button>
                 </div>
             </div>
             <div class="row mb-3">
                 <div class="col">
-                    <button class="btn btn-block btn-success shadow" @click="modifyRating(2)">A lot better</button>
+                    <button class="btn btn-block btn-success shadow py-3" @click="modifyRating(2)">A lot better</button>
                 </div>
                 <div class="col">
-                    <button class="btn btn-block btn-danger shadow" @click="modifyRating(-2)">A lot worse</button>
+                    <button class="btn btn-block btn-danger shadow py-3" @click="modifyRating(-2)">A lot worse</button>
                 </div>
             </div>
             <div class="form-group shadow p-3 mb-3 bg-white rounded">
@@ -46,7 +46,7 @@
 
 <script>
 
-import { mapState } from 'vuex';
+import { mapState, mapGetters } from 'vuex';
 
 export default {
 
@@ -64,10 +64,11 @@ export default {
 
     computed: {
         ...mapState('ratings', {
-            ratings: 'all'
+            ratings: 'all',
         }),
 
-        ...mapState(['trackers']),
+        ...mapGetters('ratings', ['trackers']),
+        // ...mapState(['trackers']),
 
         lastRating() {
             if (this.ratings && this.ratings[this.myRating.tracker]){
@@ -106,8 +107,8 @@ export default {
     },
 
     created() {
-        if (this.$store.state.trackers && this.$store.state.trackers.length > 0){
-            this.myRating.tracker = this.$store.state.trackers[0];
+        if (this.trackers && this.trackers.length > 0){
+            this.myRating.tracker = this.trackers[0];
             this.myRating.value = this.lastRating.value;
         }
     },
@@ -127,3 +128,5 @@ export default {
 };
 
 </script>
+
+

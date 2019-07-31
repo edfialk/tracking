@@ -71,8 +71,8 @@ export default new Vuex.Store({
       let query = await state.db.collection('users').doc(state.user.uid).get();
       let data = query.data();
 
-      commit('setTrackers', data.trackers);
-      commit('setThings', data.factors);
+      // commit('setTrackers', data.trackers);
+      // commit('setThings', data.factors);
       commit('setStatus', 'success');
       commit('error', null);
      

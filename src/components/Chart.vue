@@ -4,6 +4,16 @@
       class="my-5"
       v-if="!hasData"
     >Add data to see this chart.</h5>
+    <div class="text-right">
+      <select
+        v-model="timerange"
+        class="transparent small"
+      >
+        <option value="week">Week</option>
+        <option value="month">Month</option>
+        <option value="year">Year</option>
+      </select>
+    </div>
     <div id="chart"></div>
     <div class="legend pb-2">
       <span
@@ -20,6 +30,7 @@
 
 <script>
 import c3 from "c3";
+import * as moment from 'moment';
 
 export default {
   props: {
@@ -29,36 +40,45 @@ export default {
     regions: {
       type: Object
     },
-    xmin: {
-      type: Date
-    },
-    xmax: {
-      type: Date
-    }
   },
 
   data() {
     return {
       chart: null,
+      timerange: "week",
+      ranges: {
+				week: moment().subtract(1, "week").toDate(),
+        month: moment().subtract(1, "month").toDate(),
+        year: moment().subtract(1, "year").toDate()
+      },
+      ticks: {
+        week: [],
+        month: [],
+        year: []
+      },
+      formats: {
+        week: '%a',
+        month: '%b %d',
+        year: '%b'
+      },
       options: {
         bindto: "#chart",
         size: {
           height: 150
         },
         data: {},
+        point: {
+          show: false
+        },
         axis: {
           x: {
             type: "timeseries",
             tick: {
-              count: 8,
+              count: 7,
               format: "%a", //'%m-%d'
-              fit: true,
-              culling: {
-                max: 6
-              }
+              fit: false, //true aligns tick with data
+              values: []
             },
-            min: this.xmin,
-            max: this.xmax
           },
           y: {
             show: false,
@@ -67,7 +87,10 @@ export default {
           }
         },
         zoom: {
-          enabled: true
+          // enabled: true,
+          onzoomend: function(domain) {
+            console.log('zoom end ', domain);
+          }
         },
         tooltip: {
           format: {
@@ -76,45 +99,48 @@ export default {
             }
           }
         },
-        grid: {
-          x: {
-            show: false
-          }
-        },
         legend: {
           show: false
-        }
+        },
+        regions: [],
       },
     };
+  },
+
+  created() {
+    for (let i = 0; i < 8; i++){
+      this.ticks.week.push(moment().subtract(i, 'days'));
+    }
+    for (let i = 0; i < 5; i++){
+      this.ticks.month.push(moment().subtract(i, 'weeks'));
+    }
+    for (let i = 0; i < 12; i++){
+      this.ticks.year.push(moment().subtract(i, 'months'));
+    }
+
+    this.options.axis.x.tick.values = this.ticks.week;
+    this.options.axis.x.min = this.ranges.week;
   },
 
   mounted() {
     this.options.data = this.chartData;
 
-    // if (!this.hasData) {
-    //   return;
-    // }
-
-    this.chart = c3.generate(this.options);
-
-    // window.chart = this.chart;
-
     if (this.regions) {
       this.setRegions(this.regions);
     }
 
-    if (this.xmin && this.xmax) {
-      window.setTimeout(() => {
-        this.chart.zoom([this.xmin, this.xmax]);
-      }, 0);
-    }
+    this.chart = c3.generate(this.options);
+    window.chart = this.chart;
 
   },
 
   methods: {
-    setRegions(regions) {
-      if (!this.chart) return;
+    draw() {
+      this.chart.internal.loadConfig(this.options);
+      this.chart.flush();
+    },
 
+    setRegions(regions) {
       let r = [];
       for (let i in regions) {
         const thing = regions[i].thing;
@@ -138,36 +164,32 @@ export default {
         }
       }
 
-      this.chart.regions(r);
+      this.options.regions = r;
+    },
 
-    }
+    zoom() {
+      this.options.axis.x.tick.values = this.ticks[this.timerange];
+      this.options.axis.x.tick.format = this.formats[this.timerange];
+      this.draw();
+      this.chart.zoom([this.ranges[this.timerange], new Date()]);
+    },
+
   },
 
   watch: {
     regions(val) {
       this.setRegions(val);
+      this.draw();
     },
 
     chartData(val) {
-      if (!this.chart) this.chart = c3.generate(this.options);
-
+      this.options.data = val;
       this.chart.load(val);
-
-      // if (this.xmin && this.xmax) {
-      //   this.chart.zoom([this.xmin, this.xmax]);
-      // }
     },
 
-    xmin(val) {
-      if (val && this.xmax){
-        this.chart.zoom([val, this.xmax]);
-
-      }
-    },
-
-    // xmax(val) {
-    //   if (val && this.xmin) this.chart.zoom([this.xmin, val]);
-    // }
+    timerange() {
+      this.zoom();
+    }
   },
 
   computed: {
