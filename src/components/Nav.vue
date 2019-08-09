@@ -22,6 +22,7 @@ export default {
     computed: {
         action() {
             switch (this.$route.name) {
+                case 'thing':
                 case 'things':
                 case 'add-thing':
                     return '/thing/add';

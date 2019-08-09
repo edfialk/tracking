@@ -39,7 +39,7 @@ export default {
       next();
     });
 
-  },
+},
 
   computed: {
     signedIn() {

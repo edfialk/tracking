@@ -35,10 +35,10 @@ const actions = {
         return new Promise(async (resolve, reject) => {
             try {
                 commit('status', 'loading');
-                let resp = await rootState.db.collection('factors').doc(rootState.user.uid).get();
+                console.log(this);
+                let resp = await firebase.firestore().collection('factors').doc(rootState.user.uid).get();
                 let all = resp.data();
                 //convert firebase timestamps to date
-                // debugger;
                 for (let thing in all) {
                     if (all[thing].dates && all[thing].dates.length > 0){
                         all[thing].dates = all[thing].dates.map(range => {
@@ -69,7 +69,7 @@ const actions = {
             try {
                 let update = {};
                 update[thing.name] = thing;
-                await rootState.db.collection('factors').doc(rootState.user.uid).update(update);
+                await firebase.firestore().collection('factors').doc(rootState.user.uid).update(update);
                 commit('update', thing);
                 resolve(thing);
             } catch (e) {
@@ -84,7 +84,8 @@ const actions = {
             try {
                 let update = {};
                 update[thing.name] = thing;
-                await rootState.db.collection('factors').doc(rootState.user.uid).update(update);
+                debugger;
+                await firebase.firestore().collection('factors').doc(rootState.user.uid).update(update);
                 commit('update', thing);
                 resolve(thing);
             } catch (e) {
@@ -99,7 +100,7 @@ const actions = {
             try {
                 let update = {};
                 update[thing.name] = firebase.firestore.FieldValue.delete();
-                await rootState.db.collection('factors').doc(rootState.user.uid).update(update);
+                await firebase.firestore().collection('factors').doc(rootState.user.uid).update(update);
                 commit('delete', thing);
                 resolve();
             } catch (e) {

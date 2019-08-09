@@ -219,18 +219,16 @@ export default {
 
       if (!this.validate) return;
 
-      if (this.active) {
+      let date = {};
+      if (this.isSingleUse) {
+        date.date = new Date(this.date);
+        this.thing.dates = [date];
+      } else if (this.active) {
         this.thing.since = new Date(this.since);
       } else {
-        let date = {};
-        if (this.isSingleUse) {
-          date.date = new Date(this.date);
-        } else {
-          date.start = new Date(this.start);
-          date.end = new Date(this.end);
-        }
-
-        this.thing.date = [date];
+        date.start = new Date(this.start);
+        date.end = new Date(this.end);
+        this.thing.dates = [date];
       }
 
       try {

@@ -11,14 +11,15 @@ import ratings from './modules/ratings';
 
 
 firebase.initializeApp(firebaseConfig);
-Vue.use(Vuex)
-// Vue.prototype.$firebase = firebase;
+Vue.prototype.$firebase = firebase.firestore();
 
-// const debug = process.env.NODE_ENV !== 'production'
+Vue.use(Vuex)
+
+const debug = process.env.NODE_ENV !== 'production'
 
 const state = {
   user: null,
-  db: firebase.firestore(),
+  // db: firebase.firestore(),
   trackers: [],
   things: [],
   status: null,
@@ -26,12 +27,12 @@ const state = {
 };
 
 export default new Vuex.Store({
+  strict: debug,
   modules: {
     things,
     ratings,
     trackers
   },
-  // strict: debug,
   state,
   mutations: {
     setUser (state, payload) {
@@ -53,7 +54,7 @@ export default new Vuex.Store({
       state.status = payload;
     },
     error(state, payload) {
-      if (payload) console.log('error', payload);
+      // if (payload) console.log('error', payload);
       state.error = payload;
     },
 
@@ -67,6 +68,7 @@ export default new Vuex.Store({
       commit('error', null);
     },
 
+/*
     async getUserData ({ commit, state }) {
       let query = await state.db.collection('users').doc(state.user.uid).get();
       let data = query.data();
@@ -77,6 +79,7 @@ export default new Vuex.Store({
       commit('error', null);
      
     },
+*/
 
     addTracker ({ commit, state }, tracker) {
       return new Promise(async (resolve, reject) => {

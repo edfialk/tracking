@@ -1,5 +1,5 @@
 <template>
-     <div class="container h-100 pt-3 text-center" id="view--rate">
+     <div class="container pt-3 text-center" id="view--rate">
         <div v-if="myRating.tracker">
             <div class="form-group">
                 <select class="form-control" id="trackerSelect" v-model="myRating.tracker">

@@ -31,11 +31,11 @@
         <Chart :chartData="chartData" :xmin="xmin" :xmax="xmax" :regions="chartRegions"></Chart>
       </div>
 
-      <DateTable
+      <!-- <DateTable
         :dates="thing.dates"
         @save="setDates"
         v-if="thing.dates && thing.dates.length > 0"
-      ></DateTable>
+      ></DateTable> -->
 
       <div class="mb-3">
         <button
@@ -184,13 +184,14 @@ export default {
 
     let self = this;
 
+/*
     this.$store.watch(() => {
       self.thing = self.$store.getters['things/name'](this.$route.params.id);
 
       // if (!self.thing) self.notFound = true;
       self.notFound = !self.thing;
     });
-
+*/
   },
 
   computed: {
@@ -329,6 +330,7 @@ export default {
     },
 
     setDates(dates) {
+      console.log('setting dates');
       this.thing.dates = dates;
       this.save(false);
     },
@@ -365,7 +367,8 @@ export default {
 
     onClickUseOnce() {
       $("#modal-start").modal("hide");
-      this.thing.dates.push({date: new Date()});
+      let date = new Date();
+      this.thing.dates.push({ date });
       this.save(false);
     },
 

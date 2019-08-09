@@ -68,7 +68,7 @@ export default {
         },
         data: {},
         point: {
-          show: false
+          show: true
         },
         axis: {
           x: {
@@ -88,9 +88,6 @@ export default {
         },
         zoom: {
           // enabled: true,
-          onzoomend: function(domain) {
-            console.log('zoom end ', domain);
-          }
         },
         tooltip: {
           format: {
@@ -103,6 +100,11 @@ export default {
           show: false
         },
         regions: [],
+        grid: {
+          x: {
+            lines: [],
+          },
+        },
       },
     };
   },
@@ -120,6 +122,7 @@ export default {
 
     this.options.axis.x.tick.values = this.ticks.week;
     this.options.axis.x.min = this.ranges.week;
+    this.options.axis.x.max  = new Date();
   },
 
   mounted() {
@@ -142,17 +145,25 @@ export default {
 
     setRegions(regions) {
       let r = [];
+      let l = [];
       for (let i in regions) {
         const thing = regions[i].thing;
         if (thing.dates && thing.dates.length) {
-          r = r.concat(thing.dates.map(date => {
-            return {
-              axis: 'x',
-              start: date.start,
-              end: date.end,
-              class: regions[i].color
-            };
-          }));
+          thing.dates.forEach(d => {
+            if (d.start && d.end) {
+              r.push({
+                axis: 'x',
+                start: d.start,
+                end: d.end,
+                class: regions[i].color
+              });
+            } else if (d.date) {
+              l.push({
+                value: d.date,
+                text: thing.name
+              });
+            }
+          })
         }
         if (thing.since) {
           r.push({
@@ -165,6 +176,7 @@ export default {
       }
 
       this.options.regions = r;
+      this.options.grid.x.lines = l;
     },
 
     zoom() {

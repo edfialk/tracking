@@ -1,4 +1,6 @@
 import Vue from 'vue';
+import firebase from 'firebase/app';
+import 'firebase/firestore';
 
 const state = {
     all: {}
@@ -35,7 +37,7 @@ const actions = {
     get ({ commit, rootState }) {
         return new Promise(async (resolve, reject) => {
             try {
-                let query = rootState.db.collection('ratings').doc(rootState.user.uid);
+                let query = firebase.firestore().collection('ratings').doc(rootState.user.uid);
                 let resp = await query.get();
                 let all = resp.data();
                 for (let tracker in all) {
@@ -67,12 +69,6 @@ const actions = {
                     rating.date = new Date();
                 }
 
-                // let trackerRef = await rootState.db.collection(rating.tracker);
-                // if (!trackerRef) {
-                //     commit('error', 'Tracker not found.', { root: true });
-                //     reject('Tracker not found.');
-                // }
-
                 let ratings = [];
                 if (state.all[rating.tracker])
                     ratings = state.all[rating.tracker].slice();
@@ -85,7 +81,7 @@ const actions = {
                 let update = {};
                 update[rating.tracker] = ratings;
 
-                await rootState.db.collection('ratings').doc(rootState.user.uid).update(update);
+                await firebase.firestore().collection('ratings').doc(rootState.user.uid).update(update);
 
                 commit('add', rating);
                 resolve(update);

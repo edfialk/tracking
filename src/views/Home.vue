@@ -64,9 +64,6 @@ export default {
         columns: []
       };
 
-      //get 7 days or 2 points
-
-      // let ratings = this.since(this.weekago);
       let ratings = this.ratings;
 
       for (let t in ratings) {

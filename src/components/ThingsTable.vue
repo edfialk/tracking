@@ -2,30 +2,34 @@
 
   <div class="py-3 things">
 
-    <p class="small">Click name to toggle on graph.</p>
-    <table class="table table-sm small">
-      <thead>
-        <tr>
-          <th>Name</th>
-          <th class="dropdown-toggle">Used</th>
-          <th>Color</th>
-          <th></th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr v-for="thing in all" :key="thing.name">
-          <td @click="toggleThing(thing.name)">{{ thing.name }}</td>
-          <td>{{ lastUsed(thing) }}</td>
-          <td class="color" :class="selected[thing.name] ? selected[thing.name].color : ''"></td>
-          <td class="text-right">
-            <router-link :to="'/thing/' + thing.name">
-              <span class="oi oi-chevron-right text-muted lead"></span>
-            </router-link>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-
+    <div v-if="Object.keys(all).length > 0">
+      <p class="small">Click name to toggle on graph.</p>
+      <table class="table table-sm small">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th class="dropdown-toggle">Used</th>
+            <th>Color</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="thing in all" :key="thing.name">
+            <td @click="toggleThing(thing.name)">{{ thing.name }}</td>
+            <td>{{ lastUsed(thing) }}</td>
+            <td class="color" :class="selected[thing.name] ? selected[thing.name].color : ''"></td>
+            <td class="text-right">
+              <router-link :to="'/thing/' + thing.name">
+                <span class="oi oi-chevron-right text-muted lead"></span>
+              </router-link>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div v-else>
+      <router-link to="/thing/add">Click here</router-link> to add factors like medicine, goop, etc.
+    </div>
   </div>
 
 </template>
@@ -83,14 +87,15 @@ export default {
       if (thing.since) {
         res = 'today';
       } else if (!thing.dates || thing.dates.length == 0) {
-        res = '';
+        res = 'never';
       } else {
         res = thing.dates.reduce((acc, cur) => {
-          if (cur.end && cur.end > acc){
-            return cur.end;
-          } 
+          let d = cur.end || cur.date;
+          if (d && d > acc){
+            return d;
+          }
           return acc;
-        }, thing.dates[0].end);
+        }, thing.dates[0].end ? thing.dates[0].end : thing.dates[0].date);
         res = moment(res).fromNow();
       }
 
@@ -105,10 +110,10 @@ export default {
 
     ...mapState('things', ['all']),
 
-    ...mapGetters('things', [
-      'active',
-      'inactive'
-    ]),
+    // ...mapGetters('things', [
+    //   'active',
+    //   'inactive'
+    // ]),
 
   },
 
