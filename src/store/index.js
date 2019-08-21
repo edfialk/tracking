@@ -19,7 +19,6 @@ const debug = process.env.NODE_ENV !== 'production'
 
 const state = {
   user: null,
-  // db: firebase.firestore(),
   trackers: [],
   things: [],
   status: null,
@@ -81,28 +80,28 @@ export default new Vuex.Store({
     },
 */
 
-    addTracker ({ commit, state }, tracker) {
-      return new Promise(async (resolve, reject) => {
-          try {
+    // addTracker ({ commit, state }, tracker) {
+    //   return new Promise(async (resolve, reject) => {
+    //       try {
 
-              if (typeof tracker !== 'string'){
-                  commit('error', "Tracker should be string.");
-                  reject("Tracker should be string.");
-              }
+    //           if (typeof tracker !== 'string'){
+    //               commit('error', "Tracker should be string.");
+    //               reject("Tracker should be string.");
+    //           }
 
-              let trackers = state.trackers.slice() || [];
-              trackers.push(tracker);
+    //           let trackers = state.trackers.slice() || [];
+    //           trackers.push(tracker);
 
-              await state.db.collection('users').doc(state.user.uid).update({ trackers });
+    //           await state.db.collection('users').doc(state.user.uid).update({ trackers });
 
-              commit('addTracker', tracker);
-              resolve(tracker);
-          } catch (e) {
-              commit('error', e, );
-              reject(e);
-          }
-      });
-  }
+    //           commit('addTracker', tracker);
+    //           resolve(tracker);
+    //       } catch (e) {
+    //           commit('error', e, );
+    //           reject(e);
+    //       }
+    //   });
+    // }
 
   },
 

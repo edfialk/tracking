@@ -3,7 +3,9 @@ import firebase from 'firebase/app';
 import 'firebase/firestore';
 
 const state = {
-    all: {}
+    all: {},
+    status: null,
+    error: null
 };
 
 const getters = {
@@ -15,21 +17,6 @@ const getters = {
     },
     trackers: (state) => {
         return Object.keys(state.all);
-    },
-    since: (state) => (date) => {
-        let res = {};
-        for (let t in state.all) {
-            res[t] = state.all[t].filter(r => r.date > date);
-        }
-        return res;
-    },
-    maxCountSince: (state, getters) => (date) => {
-        let count = 0;
-        let since = getters.since(date);
-        for (let t in since){
-            count = Math.max(count, since[t].length);
-        }
-        return count;
     },
 };
 
@@ -51,7 +38,7 @@ const actions = {
                 commit('set', all);
                 resolve(all);
             } catch (e) {
-                commit('error', e, { root: true });
+                commit('error', e);
                 reject(e);
             }
         });
@@ -61,7 +48,7 @@ const actions = {
         return new Promise(async (resolve, reject) => {
             try {
                 if (!rating.tracker) {
-                    commit('error', 'Invalid rating.', { root: true });
+                    commit('error', 'Invalid rating.');
                     reject('Invalid rating.');
                 }
 
@@ -86,10 +73,33 @@ const actions = {
                 commit('add', rating);
                 resolve(update);
             } catch (e) {
-                commit('error', e, { root: true });
+                commit('error', e);
                 reject(e);
             }
         });
+    },
+
+    deleteTracker({ commit, state, rootState }, tracker) {
+        return new Promise(async (resolve, reject) => {
+            try {
+                if (typeof name !== 'string'){
+                    commit('error', "Tracker should be string.");
+                    reject("Tracker should be string.");
+                    return;
+                }
+
+                let update = {};
+                update[tracker] = firebase.firestore.FieldValue.delete();          
+                
+                await firebase.firestore().collection('ratings').doc(rootState.user.uid).update(update);
+
+                commit('deleteTracker', tracker);
+                commit('status', 'loading');
+            } catch (e) {
+                commit('error', e);
+                reject(e);
+            }
+        })
     }
 };
 
@@ -98,13 +108,21 @@ const mutations = {
         Vue.set(state, 'all', payload);
     },
 
-    // update(state, payload) {
-    //     state.all[payload]
-    // },
-
     add(state, payload) {
         state.all[payload.tracker] = state.all[payload.tracker] || [];
         state.all[payload.tracker].push({ date: payload.date, value: payload.value });
+    },
+
+    deleteTracker(state, payload) {
+        Vue.delete(state.all, payload);
+    },
+
+    status(state, payload) {
+        state.status = payload;
+    },
+
+    error(state, payload) {
+        state.error = payload;
     }
 };
 

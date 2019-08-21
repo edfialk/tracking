@@ -1,11 +1,12 @@
 <template>
 
-    <div>
-        <table class="table shadow">
+    <div class="h-100">
+        <table class="table shadow" v-if="Object.keys(all).length > 0">
             <thead>
                 <tr>
                     <th>Name</th>
                     <th class="text-center">Delete</th>
+                    <th class="text-center">View</th>
                 </tr>
             </thead>
             <tbody class="bg-white">
@@ -14,9 +15,20 @@
                     <td class="text-center text-danger" @click="del(thing)">
                         <span class="oi oi-x"></span>
                     </td>
+                    <td class="text-center">
+                        <router-link :to="'/thing/' + thing.name">
+                            <span class="oi oi-chevron-right text-muted lead"></span>
+                        </router-link>
+                    </td>
                 </tr>
             </tbody>
         </table>
+        <div v-else class="flex h-100 p-4">
+            <div>
+                <h5><router-link to="/thing/add">Click here</router-link> to make a record of something that might influence what you are tracking, like a medicine, shampoo, or big fluffy stuffed unicorn.</h5>
+                <h6 class="mt-5">You can add more factors later by coming to this page and clicking the plus in the green circle below.</h6>
+            </div>
+        </div>
     </div>
 
 </template>

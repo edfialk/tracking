@@ -121,7 +121,7 @@ export default {
     }
 
     this.options.axis.x.tick.values = this.ticks.week;
-    this.options.axis.x.min = this.ranges.week;
+    // this.options.axis.x.min = this.ranges.week;
     this.options.axis.x.max  = new Date();
   },
 
@@ -135,12 +135,14 @@ export default {
     this.chart = c3.generate(this.options);
     window.chart = this.chart;
 
+    this.ensureVisibleData();
   },
 
   methods: {
     draw() {
       this.chart.internal.loadConfig(this.options);
       this.chart.flush();
+      // this.zoom();
     },
 
     setRegions(regions) {
@@ -177,6 +179,12 @@ export default {
 
       this.options.regions = r;
       this.options.grid.x.lines = l;
+
+      return {
+        regions: r,
+        lines: l
+      };
+
     },
 
     zoom() {
@@ -186,17 +194,53 @@ export default {
       this.chart.zoom([this.ranges[this.timerange], new Date()]);
     },
 
+    ensureVisibleData() {
+      //if no data in last week, try month
+      let hasWeek = false;
+      let hasMonth = false;
+      let hasYear = false;
+      this.options.data.columns.forEach(column => {
+        if (column[0].startsWith("x")){
+          for (let i = 1; i < column.length; i++){
+            let date = column[i];
+            if (date > this.ranges.week) {
+              hasWeek = true;
+              return;
+            } else if (date > this.ranges.month) {
+              hasMonth = true;
+            } else if (date > this.ranges.year) {
+              hasYear = true;
+            }
+          }
+        }
+      });
+
+      if (!hasWeek) {
+        if (hasMonth) {
+          this.timerange = "month";
+        } else if (hasYear) {
+          this.timerange = "year";
+        }
+      }
+      this.zoom();
+    }
+
   },
 
   watch: {
     regions(val) {
-      this.setRegions(val);
-      this.draw();
+      // this.setRegions(val);
+      // this.zoom();
+      // this.chart.regions(val);
+      let { regions, lines } = this.setRegions(val);
+      this.chart.regions(regions);
+      this.chart.xgrids(lines);
     },
 
     chartData(val) {
       this.options.data = val;
       this.chart.load(val);
+      this.ensureVisibleData();
     },
 
     timerange() {

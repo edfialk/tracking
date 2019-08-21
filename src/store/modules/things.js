@@ -35,7 +35,6 @@ const actions = {
         return new Promise(async (resolve, reject) => {
             try {
                 commit('status', 'loading');
-                console.log(this);
                 let resp = await firebase.firestore().collection('factors').doc(rootState.user.uid).get();
                 let all = resp.data();
                 //convert firebase timestamps to date
@@ -67,10 +66,10 @@ const actions = {
     add ({ commit, rootState }, thing) {
         return new Promise(async (resolve, reject) => {
             try {
+                commit('update', thing);
                 let update = {};
                 update[thing.name] = thing;
                 await firebase.firestore().collection('factors').doc(rootState.user.uid).update(update);
-                commit('update', thing);
                 resolve(thing);
             } catch (e) {
                 commit('error', e, { root: true });
@@ -84,7 +83,6 @@ const actions = {
             try {
                 let update = {};
                 update[thing.name] = thing;
-                debugger;
                 await firebase.firestore().collection('factors').doc(rootState.user.uid).update(update);
                 commit('update', thing);
                 resolve(thing);
@@ -116,9 +114,9 @@ const mutations = {
         Vue.set(state, 'all', payload);
     },
 
-    // add(state, thing) {
-    //     state.all[thing.name] = thing;
-    // },
+    add(state, thing) {
+        state.all[thing.name] = thing;
+    },
 
     update(state, thing) {
         state.all[thing.name] = thing;
@@ -130,6 +128,16 @@ const mutations = {
     
     status(state, payload) {
         state.status = payload;
+    },
+
+    setDate(state, { name, dates }) {
+        state.all[name].dates = dates;
+    },
+
+    setName(state, { thing, name }) {
+        Vue.delete(state.all, thing.name);
+        Vue.set(state.all, name, thing);
+        // state.all[name] = thing;
     }
 };
 

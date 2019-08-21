@@ -1,7 +1,11 @@
 import Vue from 'vue';
+import firebase from 'firebase/app';
+import 'firebase/firestore';
 
 const state = {
-    all: []
+    all: [],
+    status: null,
+    error: null
 };
 
 const getters = {
@@ -14,50 +18,37 @@ const getters = {
 };
 
 const actions = {
-    get ({ commit, rootState }) {
-        return new Promise(async (resolve, reject) => {
-            try {
-                let query = rootState.db.collection('trackers');
-                let resp = await query.get();
-                let all = resp.docs.map(doc => {
-                    return {
-                        id: doc.id,
-                        ...doc.data()
-                    };
-                });
-                commit('set', all);
-                resolve(all);
-            } catch (e) {
-                commit('error', e, { root: true });
-                reject(e);
-            }
-        });
-    },
-
-    add ({ commit, rootState }, tracker) {
+    delete({ commit, rootState}, name ) {
         return new Promise(async (resolve, reject) => {
             try {
 
-                if (typeof tracker !== 'string'){
-                    commit('error', "Tracker should be string.", { root: true });
+                if (typeof name !== 'string'){
+                    commit('error', "Tracker should be string.");
                     reject("Tracker should be string.");
+                    return;
                 }
 
-                let trackers = state.all.slice() || [];
-                trackers.push(tracker);
+                commit('status', 'loading');
+
+                let trackers = state.all.filter(t => t !== name);
+
+                await firebase.firestore().collection('users').doc(rootState.user.uid).update({
+                    trackers: firebase.firestore.FieldValue.arrayRemove(name)
+                });
 
                 let update = {};
-                update['trackers'] = trackers;
+                update[name] = firebase.firestore.FieldValue.delete();
 
-                await rootState.db.collection('users').doc(rootState.user.uid).update(update);
+                await firebase.firestore().collection('ratings').doc(rootState.user.uid).update(update);
 
-                commit('add', tracker);
-                resolve(tracker);
+                commit('set', trackers);
+                commit('status', 'success');
+
             } catch (e) {
-                commit('error', e, { root: true });
+                commit('error', e);
                 reject(e);
             }
-        });
+        })
     }
 };
 
@@ -68,6 +59,13 @@ const mutations = {
 
     add(state, payload) {
         state.all = [...state.all, payload];
+    },
+
+    status(state, payload) {
+        state.status = payload;
+    },
+    error(state, payload) {
+        state.error = payload;
     }
 };
 

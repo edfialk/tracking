@@ -28,7 +28,7 @@
       </div>
 
       <div class="mb-3 p-3 bg-light rounded shadow text-center">
-        <Chart :chartData="chartData" :xmin="xmin" :xmax="xmax" :regions="chartRegions"></Chart>
+        <Chart :chartData="chartData" :regions="chartRegions"></Chart>
       </div>
 
       <!-- <DateTable
@@ -46,7 +46,7 @@
         >Rename {{ thing.name }}</button>
         <button
           type="btn"
-          class="btn btn-danger btn-block"
+          class="btn btn-secondary btn-block"
           @click="onClickDelete"
         >Stop tracking {{ thing.name }}</button>
       </div>
@@ -171,7 +171,7 @@ export default {
 
   data() {
     return {
-      thing: null,
+      // thing: null,
       showModal: false,
       inputName: '',
       isNameTaken: false,
@@ -179,20 +179,15 @@ export default {
     };
   },
 
-  created() {
-    this.thing = this.$store.getters['things/name'](this.$route.params.id);
+  // beforeMount() {
+  //   this.thing = {...this.$store.getters['things/name'](this.$route.params.id)};
 
-    let self = this;
+  //   this.$store.watch(
+  //     (state, getters) => getters['things/name'](this.$route.params.id), 
+  //     thing => this.thing = { ...thing }
+  //   );
 
-/*
-    this.$store.watch(() => {
-      self.thing = self.$store.getters['things/name'](this.$route.params.id);
-
-      // if (!self.thing) self.notFound = true;
-      self.notFound = !self.thing;
-    });
-*/
-  },
+  // },
 
   computed: {
 
@@ -203,6 +198,10 @@ export default {
     ...mapGetters('ratings', {
       ratings: 'get'
     }),
+
+    thing() {
+      return this.$store.getters['things/name'](this.$route.params.id);
+    },
 
     latestDate() {
       if (!this.thing.dates || this.thing.dates.length == 0) {
@@ -232,22 +231,6 @@ export default {
       return date.start || date.date;
     },
 
-    xmin() {
-      if (!this.earliestDate) return null;
-
-      let date = this.earliestDate;
-      date.setDate(date.getDate() - 1);
-      return date;
-    },
-
-    xmax() {
-      if (!this.latestDate) return null;
-      
-      let date = this.latestDate;
-      date.setDate(date.getDate() + 1);
-      return date;
-    },
-
     chartData() {
 
       let data = {
@@ -260,7 +243,7 @@ export default {
 
       let dates = {};
       let ratings = {};
-
+      
 
       for (let tracker in this.ratings) {
         dates[tracker] = dates[tracker] || [];
@@ -305,18 +288,6 @@ export default {
       }
     },
 
-    stop() {
-      this.thing.dates.push({
-        start: this.thing.since,
-        end: new Date()
-      });
-      //need to wait before re-render or click gets fired on new button
-      window.setTimeout(() => {
-        this.thing.since = null;
-        this.save(false);
-      }, 10);
-    },
-
     async delete() {
       try {
         this.loading = true;
@@ -330,8 +301,7 @@ export default {
     },
 
     setDates(dates) {
-      console.log('setting dates');
-      this.thing.dates = dates;
+      this.$store.commit('things/setDate', { name: this.thing.name, dates });
       this.save(false);
     },
 
@@ -342,8 +312,8 @@ export default {
     },
 
     onSubmitName() {
-
-      let t = this.$store.getters['things/name'](this.inputName);
+      let newName = this.inputName;
+      let t = this.$store.getters['things/name'](newName);
       if (t) {
         this.isNameTaken = true;
         return;
@@ -355,14 +325,12 @@ export default {
       if (this.inputName.length == 0) return;
 
       let oldName = this.thing.name;
-      this.thing.name = this.inputName;
-      this.inputName = "";
-      this.save(false);
+      let thing = {...this.thing, name: newName };
 
+      this.$store.dispatch('things/add', thing);
+      this.$router.replace('/thing/' + newName);
       this.$store.dispatch('things/delete', { name: oldName });
-
-      this.$router.push('/thing/' + this.thing.name);
-
+      this.inputName = "";
     },
 
     onClickUseOnce() {
@@ -374,9 +342,21 @@ export default {
 
     onClickUseOngoing() {
       $("#modal-start").modal("hide");
-      this.thing.since = new Date();
+      this.$set(this.thing, 'since', new Date());
       this.save(false);
-    }
+    },
+
+    stop() {
+      //need to wait before re-render or click gets fired on new button
+      window.setTimeout(() => {
+        this.thing.dates.push({
+          start: this.thing.since,
+          end: new Date()
+        });
+        this.thing.since = null;
+        this.save(false);
+      }, 10);
+    },
   }
 };
 </script>

@@ -4,7 +4,7 @@
     <form @submit.prevent="save">
 
       <div class="form-group">
-        <label for="name">What is this thing?</label>
+        <label for="name">What would you like to call this?</label>
         <input
           type="text"
           class="form-control"
@@ -17,7 +17,7 @@
 
       <div class="form-group">
         <label>How long did you do it?</label>
-        <div class="d-flex justify-content-around">
+        <div class="d-flex justify-content-around align-items-center">
           <button
             type="button"
             class="btn"
@@ -77,6 +77,7 @@
           v-model="date"
           ref="singleDate"
           value-zone="America/Los_Angeles"
+          format="DDDD"
         ></datetime>
       </div>
 
@@ -92,6 +93,7 @@
           v-model="since"
           ref="startDate"
           value-zone="America/Los_Angeles"
+          format="DDDD"
         ></datetime>
       </div>
 
@@ -107,6 +109,7 @@
           ref="startDate"
           value-zone="America/Los_Angeles"
           :max-datetime="end"
+          format="DDDD"
         ></datetime>
       </div>
 
@@ -114,7 +117,7 @@
         class="form-group"
         v-if="!isSingleUse && !active"
       >
-        <label>When did you stop?</label>
+        <label>When did (or will) you stop?</label>
         <datetime
           :bootstrap-styling="true"
           input-class="form-control"
@@ -122,6 +125,7 @@
           ref="endDate"
           value-zone="America/Los_Angeles"
           :min-datetime="start"
+          format="DDDD"
         ></datetime>
       </div>
 

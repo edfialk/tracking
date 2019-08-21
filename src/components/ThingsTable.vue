@@ -27,7 +27,7 @@
         </tbody>
       </table>
     </div>
-    <div v-else>
+    <div v-else class="px-3">
       <router-link to="/thing/add">Click here</router-link> to add factors like medicine, goop, etc.
     </div>
   </div>
@@ -37,7 +37,7 @@
 <script>
 
 import * as moment from 'moment';
-import { mapState, mapGetters } from 'vuex';
+import { mapState } from 'vuex';
 
 export default {
 	
@@ -110,11 +110,6 @@ export default {
 
     ...mapState('things', ['all']),
 
-    // ...mapGetters('things', [
-    //   'active',
-    //   'inactive'
-    // ]),
-
   },
 
   watch: {
@@ -125,7 +120,8 @@ export default {
     all(val) {
       if (!val) return;
       for (let t in val) {
-        this.toggleThing(t);
+        if (Object.keys(this.selected).length < 5)
+          this.toggleThing(t);
       }
     }
   }

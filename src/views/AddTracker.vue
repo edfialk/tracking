@@ -56,9 +56,9 @@ export default {
   },
 
   methods: {
-    ...mapActions({
-			add: 'addTracker'
-		}),
+    // ...mapActions({
+		// 	add: 'addTracker'
+		// }),
 
     ...mapActions('ratings', {
       rate: 'add'
@@ -68,7 +68,7 @@ export default {
       this.isLoading = true;
 
       try {
-				await this.add(this.name);
+				// await this.add(this.name);
 
 				await this.rate({
 					value: this.rating,

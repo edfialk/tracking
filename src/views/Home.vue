@@ -21,7 +21,7 @@
 </template>
 
 <script>
-import { mapState, mapGetters } from "vuex";
+import { mapState } from "vuex";
 import Things from "../components/ThingsTable";
 import Chart from "../components/Chart";
 
@@ -38,24 +38,16 @@ export default {
 
 
   methods: {
-    setRegions(colors) {
-      this.regions = colors;
+    setRegions(regions) {
+      this.regions = regions;
 		}
 		
-  },
-
-  watch: {
-    timerange(val) {
-      this.xmin = this.ranges[val];
-    }
   },
 
   computed: {
     ...mapState("ratings", {
       ratings: "all"
     }),
-
-    ...mapGetters("ratings", ["since", "maxCountSince"]),
 
     chartData() {
       let data = {
@@ -83,9 +75,6 @@ export default {
       return data;
     },
 
-    xmax() {
-      return new Date();
-    }
   } //computed
 };
 </script>
