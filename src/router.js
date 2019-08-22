@@ -20,6 +20,11 @@ let router = new Router({
       name: 'login',
       component: () => import(/* webpackChunkName: "login" */ './views/Login.vue')
     },
+    // {
+    //   path: '/logout',
+    //   name: 'logout',
+    //   c
+    // }
     {
       path: '/thing/add',
       name: 'add-thing',
