@@ -9,7 +9,7 @@
             <router-link to="/things" class="oi oi-list"></router-link>
             <div></div>
             <router-link to="/trackers" class="oi oi-graph"></router-link>
-            <router-link to="/selfie" class="oi oi-camera-slr"></router-link>
+            <router-link to="/photo" class="oi oi-camera-slr"></router-link>
         </div>
     </nav>
 
@@ -28,7 +28,7 @@ export default {
                     return '/thing/add';
                 case 'trackers':
                 case 'add-tracker':
-                    return '/tracker/add';            
+                    return '/tracker/add';
                 default:
                     return '/rate';
             }

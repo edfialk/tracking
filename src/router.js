@@ -20,11 +20,11 @@ let router = new Router({
       name: 'login',
       component: () => import(/* webpackChunkName: "login" */ './views/Login.vue')
     },
-    // {
-    //   path: '/logout',
-    //   name: 'logout',
-    //   c
-    // }
+    {
+      path: '/logout',
+      name: 'logout',
+      // component: () => import(/* webpackChunkName: "logout" */ './views/Logout.vue')
+    },
     {
       path: '/thing/add',
       name: 'add-thing',
@@ -60,18 +60,35 @@ let router = new Router({
       path: '/things',
       name: 'things',
       component: () => import(/* webpackChunkName: "things" */ './views/Things.vue')
-    }
+    },
+    {
+      path: '/photo',
+      name: 'photo',
+      component: () => import(/* webpackChunkName: "photo" */ './views/Photo.vue')
+    },
   ]
 })
 
-router.beforeEach((to, from, next) => {
-  if (to.name != 'login' && !store.getters.isLoggedIn) {
-    next('/login');
-  } else if (to.name == 'login' && store.getters.isLoggedIn) {
-    next('/');
-  } else {
-    next();
+router.beforeEach(async (to, from, next) => {
+
+  if (to.name == 'logout' && store.getters.isLoggedIn) {
+    await store.dispatch('logout');
+    return next('/login');
   }
+
+  // if (to.name == 'logout' && !store.getters.isLoggedIn) {
+  //   return next('/login');
+  // }
+
+  if (!store.getters.isLoggedIn && to.name != 'login') {
+    return next('/login');
+  } 
+  
+  if (store.getters.isLoggedIn && to.name == 'login') {
+    return next('/');
+  }
+
+  next();
 
 });
 

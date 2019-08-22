@@ -4,8 +4,8 @@ import 'firebase/firestore';
 
 const state = {
     all: [],
-    status: null,
-    error: null
+    status: '',
+    error: ''
 };
 
 const getters = {

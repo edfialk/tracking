@@ -36,7 +36,6 @@ export default {
     };
   },
 
-
   methods: {
     setRegions(regions) {
       this.regions = regions;

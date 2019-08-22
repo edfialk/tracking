@@ -4,8 +4,8 @@ import 'firebase/firestore';
 
 const state = {
     all: {},
-    status: null,
-    error: null
+    status: '',
+    error: ''
 };
 
 const getters = {
@@ -34,30 +34,39 @@ const actions = {
     get ({ commit, rootState }) {
         return new Promise(async (resolve, reject) => {
             try {
+
                 commit('status', 'loading');
+                commit('error', null);
+
+                let all = {};
                 let resp = await firebase.firestore().collection('factors').doc(rootState.user.uid).get();
-                let all = resp.data();
-                //convert firebase timestamps to date
-                for (let thing in all) {
-                    if (all[thing].dates && all[thing].dates.length > 0){
-                        all[thing].dates = all[thing].dates.map(range => {
-                            for (let time in range){
-                                if (range[time].toDate){
-                                    range[time] = range[time].toDate();
+
+                if (resp.exists) {
+                    all = resp.data();
+                    //convert firebase timestamps to date
+                    for (let thing in all) {
+                        if (all[thing].dates && all[thing].dates.length > 0){
+                            all[thing].dates = all[thing].dates.map(range => {
+                                for (let time in range){
+                                    if (range[time].toDate){
+                                        range[time] = range[time].toDate();
+                                    }
                                 }
-                            }
-                            return range;
-                        });
-                    }
-                    if (all[thing].since && all[thing].since.toDate) {
-                        all[thing].since = all[thing].since.toDate();
+                                return range;
+                            });
+                        }
+                        if (all[thing].since && all[thing].since.toDate) {
+                            all[thing].since = all[thing].since.toDate();
+                        }
                     }
                 }
+
                 commit('set', all);
                 commit('status', 'success');
+
                 resolve(all);
             } catch (e) {
-                commit('error', e, { root: true });
+                commit('error', e);
                 reject(e);
             }
         });
@@ -72,7 +81,7 @@ const actions = {
                 await firebase.firestore().collection('factors').doc(rootState.user.uid).update(update);
                 resolve(thing);
             } catch (e) {
-                commit('error', e, { root: true });
+                commit('error', e);
                 reject(e);
             }
         });
@@ -87,7 +96,7 @@ const actions = {
                 commit('update', thing);
                 resolve(thing);
             } catch (e) {
-                commit('error', e, {root: true });
+                commit('error', e);
                 reject(e);
             }
         });
@@ -102,7 +111,7 @@ const actions = {
                 commit('delete', thing);
                 resolve();
             } catch (e) {
-                commit('error', e, { root: true });
+                commit('error', e);
                 reject(e);
             }
         });
@@ -128,6 +137,10 @@ const mutations = {
     
     status(state, payload) {
         state.status = payload;
+    },
+
+    error(state, payload) {
+        state.error = payload;
     },
 
     setDate(state, { name, dates }) {

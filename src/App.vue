@@ -4,15 +4,17 @@
       :name="transitionName"
       mode="out-in"
     >
-      <router-view style="padding-bottom: 80px"/>
+      <router-view style="padding-bottom: 80px" />
     </transition>
-    <Nav v-if="signedIn"></Nav>
+    <Nav v-if="isLoggedIn"></Nav>
   </main>
 </template>
 
 <script>
 
 import Nav from './components/Nav';
+
+import { mapGetters } from 'vuex';
 
 export default {
 
@@ -25,9 +27,11 @@ export default {
   },
 
   created() {
-    // this.$store.dispatch('getUserData');
-    this.$store.dispatch('things/get');
-    this.$store.dispatch('ratings/get');
+
+    if (this.isLoggedIn) {
+      this.$store.dispatch('things/get');
+      this.$store.dispatch('ratings/get');
+    }
 
     this.$router.beforeEach((to, from, next) => {
       if (to.path !== '/') {
@@ -39,12 +43,10 @@ export default {
       next();
     });
 
-},
+  },
 
   computed: {
-    signedIn() {
-      return this.$store.state.user !== null;
-    }
+    ...mapGetters(['isLoggedIn'])
   }
 
 }

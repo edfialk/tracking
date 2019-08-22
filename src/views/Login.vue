@@ -11,16 +11,16 @@
           </div>
           <div class="form-group">
             <label for="password">Password</label>
-            <input type="password" class="form-control" id="password" v-model="password" required>
+            <input type="password" class="form-control" id="password" v-model="password" required @keyup="error = ''">
           </div>
           <div class="form-group">
-            <button type="submit" class="btn btn-lg btn-light">Sign In</button>
+            <button type="submit" class="btn btn-lg btn-success">Sign In</button>
           </div>
         </form>
       </div>
 
-      <footer>
-        <div class="inner">
+      <footer class="bg-danger" v-if="error">
+        <div class="inner text-light p-3">
           {{ error }}
         </div>
       </footer>
@@ -29,9 +29,6 @@
 </template>
 
 <script>
-
-import * as firebase from 'firebase/app';
-import 'firebase/auth';
 
 export default {
 
@@ -46,13 +43,13 @@ export default {
   },
 
   methods: {
-    async login() {
-      await firebase.auth().signInWithEmailAndPassword(this.email, this.password).catch(error => {
-        // var errorCode = error.code;
+    login() {
+      this.$store.dispatch('login', { email: this.email, password: this.password }).then(() => {
+        this.error = '';
+        this.$router.push('/');
+      }).catch(error => {
         this.error = error.message;
       });
-
-      this.$router.push('/');
     }
   }
 }

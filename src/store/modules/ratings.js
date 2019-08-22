@@ -4,8 +4,8 @@ import 'firebase/firestore';
 
 const state = {
     all: {},
-    status: null,
-    error: null
+    status: '',
+    error: ''
 };
 
 const getters = {
@@ -18,24 +18,37 @@ const getters = {
     trackers: (state) => {
         return Object.keys(state.all);
     },
+    hasRatings: (state) => {
+        return Object.keys(state.all).length > 0;
+    }
 };
 
 const actions = {
     get ({ commit, rootState }) {
         return new Promise(async (resolve, reject) => {
             try {
+
+                commit('status', 'loading');
+                commit('error', null);
+
                 let query = firebase.firestore().collection('ratings').doc(rootState.user.uid);
                 let resp = await query.get();
-                let all = resp.data();
-                for (let tracker in all) {
-                    all[tracker] = all[tracker].map(rating => {
-                        if (rating.date && rating.date.toDate){
-                            rating.date = rating.date.toDate()
-                        }
-                        return rating;
-                    });
+                let all = {};
+                if (resp.exists) {
+                    all = resp.data();
+                    for (let tracker in all) {
+                        all[tracker] = all[tracker].map(rating => {
+                            if (rating.date && rating.date.toDate){
+                                rating.date = rating.date.toDate()
+                            }
+                            return rating;
+                        });
+                    }
                 }
+
                 commit('set', all);
+                commit('status', 'success');
+                
                 resolve(all);
             } catch (e) {
                 commit('error', e);

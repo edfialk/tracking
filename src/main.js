@@ -35,12 +35,19 @@ Vue.filter('ago', (value, suffix) => {
 
 Vue.config.productionTip = false;
 
-firebase.auth().onAuthStateChanged(user => {
-  store.commit('setUser', user.toJSON() );
+const unsubscribe = firebase.auth().onAuthStateChanged(user => {
+
+  if (user) {
+    store.commit('setUser', user.toJSON() );
+  }
+
   new Vue({
     router,
     store,
     render: h => h(App)
   }).$mount('#app')
+
+  unsubscribe();
+
 });
 

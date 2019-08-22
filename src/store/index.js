@@ -18,11 +18,11 @@ Vue.use(Vuex)
 const debug = process.env.NODE_ENV !== 'production'
 
 const state = {
-  user: null,
+  user: false,
   trackers: [],
   things: [],
-  status: null,
-  error: null
+  status: '',
+  error: ''
 };
 
 export default new Vuex.Store({
@@ -49,7 +49,7 @@ export default new Vuex.Store({
     setThings(state, payload) {
       state.things = payload;
     },
-    setStatus(state, payload) {
+    status(state, payload) {
       state.status = payload;
     },
     error(state, payload) {
@@ -59,55 +59,52 @@ export default new Vuex.Store({
 
   },
   actions: {
-    async signIn ({ commit, state }, { email, password }) {
-      await state.db.auth().signInWithEmailAndPassword(email, password);
+    login ({ dispatch, commit }, { email, password }) {
+      return new Promise(async (resolve, reject) => {
+        commit('status', 'loading');
+  
+        try {
 
-      commit('setUser', state.db.auth().currentUser);
-      commit('setStatus', 'success');
-      commit('error', null);
+          let resp = await firebase.auth().signInWithEmailAndPassword(email, password);
+          
+          commit('setUser', resp.user.toJSON());
+          commit('status', 'success');
+          commit('error', null);
+          
+          dispatch('things/get');
+          dispatch('ratings/get');
+
+          resolve(resp.user);
+
+        } catch (e) {
+
+          commit('setUser', false);
+          commit('status', 'error');
+          commit('error', e);
+
+          reject(e);
+
+        }
+  
+
+      });
     },
 
-/*
-    async getUserData ({ commit, state }) {
-      let query = await state.db.collection('users').doc(state.user.uid).get();
-      let data = query.data();
+    async logout ({ commit }) {
+      commit('status', 'loading');
 
-      // commit('setTrackers', data.trackers);
-      // commit('setThings', data.factors);
-      commit('setStatus', 'success');
+      await firebase.auth().signOut();
+
+      commit('setUser', null);
+      commit('status', 'success');
       commit('error', null);
-     
-    },
-*/
-
-    // addTracker ({ commit, state }, tracker) {
-    //   return new Promise(async (resolve, reject) => {
-    //       try {
-
-    //           if (typeof tracker !== 'string'){
-    //               commit('error', "Tracker should be string.");
-    //               reject("Tracker should be string.");
-    //           }
-
-    //           let trackers = state.trackers.slice() || [];
-    //           trackers.push(tracker);
-
-    //           await state.db.collection('users').doc(state.user.uid).update({ trackers });
-
-    //           commit('addTracker', tracker);
-    //           resolve(tracker);
-    //       } catch (e) {
-    //           commit('error', e, );
-    //           reject(e);
-    //       }
-    //   });
-    // }
+    }
 
   },
 
   getters: {
     isLoggedIn: state => {
-      return state.user !== null;
+      return state.user;
     }
 
   }

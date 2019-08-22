@@ -65,10 +65,10 @@ export default {
     computed: {
         ...mapState('ratings', {
             ratings: 'all',
+            status: 'status'
         }),
 
-        ...mapGetters('ratings', ['trackers']),
-        // ...mapState(['trackers']),
+        ...mapGetters('ratings', ['trackers', 'hasRatings']),
 
         lastRating() {
             if (this.ratings && this.ratings[this.myRating.tracker]){
@@ -84,6 +84,18 @@ export default {
 
     },
 
+    created() {
+
+        if (this.status == 'success' && !this.hasRatings){
+            return this.$router.push('/tracker/add');
+        }
+
+        if (this.trackers && this.trackers.length > 0){
+            this.myRating.tracker = this.trackers[0];
+            this.myRating.value = this.lastRating.value;
+        }
+    },
+
     methods: {
         modifyRating(change){
             this.myRating.value = parseInt(this.lastRating.value) + change;
@@ -92,7 +104,6 @@ export default {
         async save() {
 
             try {
-
                 this.loading = true;
 
                 await this.$store.dispatch('ratings/add', this.myRating, { root: true });
@@ -106,17 +117,13 @@ export default {
         },
     },
 
-    created() {
-        if (this.trackers && this.trackers.length > 0){
-            this.myRating.tracker = this.trackers[0];
-            this.myRating.value = this.lastRating.value;
-        }
-    },
-
     watch: {
         trackers(val) {
-            if (val && !this.myRating.tracker)
+            if (val && val.length > 0 && !this.myRating.tracker)
                 this.myRating.tracker = val[0];
+            
+            if (val && val.length == 0)
+                this.$router.push('/tracker/add');
         },
 
         'myRating.tracker'() {
