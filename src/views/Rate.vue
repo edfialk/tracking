@@ -46,7 +46,7 @@
 
 <script>
 
-import { mapState, mapGetters } from 'vuex';
+import { mapState } from 'vuex';
 
 export default {
 
@@ -68,7 +68,13 @@ export default {
             status: 'status'
         }),
 
-        ...mapGetters('ratings', ['trackers', 'hasRatings']),
+        hasRatings() {
+            return this.$store.getters['ratings/hasRatings']();
+        },
+
+        trackers() {
+            return this.$store.getters['ratings/trackers']();
+        },
 
         lastRating() {
             if (this.ratings && this.ratings[this.myRating.tracker]){
@@ -106,7 +112,7 @@ export default {
             try {
                 this.loading = true;
 
-                await this.$store.dispatch('ratings/add', this.myRating, { root: true });
+                await this.$store.dispatch('ratings/add', this.myRating);
 
                 this.loading = false;
                 this.$router.push('/kitty');

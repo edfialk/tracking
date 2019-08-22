@@ -15,10 +15,10 @@ const getters = {
     tracker: (state) => (tracker) => {
         return state.all ? state.all[tracker] : null;
     },
-    trackers: (state) => {
+    trackers: (state) => () => {
         return Object.keys(state.all);
     },
-    hasRatings: (state) => {
+    hasRatings: (state) => () => {
         return Object.keys(state.all).length > 0;
     }
 };
@@ -31,8 +31,8 @@ const actions = {
                 commit('status', 'loading');
                 commit('error', null);
 
-                let query = firebase.firestore().collection('ratings').doc(rootState.user.uid);
-                let resp = await query.get();
+                let doc = firebase.firestore().collection('ratings').doc(rootState.user.uid);
+                let resp = await doc.get();
                 let all = {};
                 if (resp.exists) {
                     all = resp.data();
@@ -44,11 +44,13 @@ const actions = {
                             return rating;
                         });
                     }
+                } else {
+                    await doc.set({});
                 }
 
                 commit('set', all);
                 commit('status', 'success');
-                
+
                 resolve(all);
             } catch (e) {
                 commit('error', e);
@@ -64,6 +66,8 @@ const actions = {
                     commit('error', 'Invalid rating.');
                     reject('Invalid rating.');
                 }
+
+                commit('status', 'loading');
 
                 if (!rating.date) {
                     rating.date = new Date();
@@ -84,6 +88,7 @@ const actions = {
                 await firebase.firestore().collection('ratings').doc(rootState.user.uid).update(update);
 
                 commit('add', rating);
+                commit('status', 'success');
                 resolve(update);
             } catch (e) {
                 commit('error', e);
@@ -92,9 +97,10 @@ const actions = {
         });
     },
 
-    deleteTracker({ commit, state, rootState }, tracker) {
+    deleteTracker({ commit, rootState }, tracker) {
         return new Promise(async (resolve, reject) => {
             try {
+                commit('status', 'loading');
                 if (typeof name !== 'string'){
                     commit('error', "Tracker should be string.");
                     reject("Tracker should be string.");
@@ -107,7 +113,7 @@ const actions = {
                 await firebase.firestore().collection('ratings').doc(rootState.user.uid).update(update);
 
                 commit('deleteTracker', tracker);
-                commit('status', 'loading');
+                commit('status', 'success');
             } catch (e) {
                 commit('error', e);
                 reject(e);

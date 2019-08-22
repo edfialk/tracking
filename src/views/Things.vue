@@ -29,6 +29,10 @@
                 <h6 class="mt-5">You can add more factors later by coming to this page and clicking the plus in the green circle below.</h6>
             </div>
         </div>
+        <div class="add-text text-center" v-if="Object.keys(all).length == 1">
+            Add more factors here<br>
+            <span class="oi oi-arrow-bottom vert-move"></span>
+        </div>
     </div>
 
 </template>

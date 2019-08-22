@@ -1,21 +1,35 @@
 <template>
-  <div>
+  <div class="h-100">
 
-    <div class="fixed-top pt-2">
+    <div v-if="status == 'success' && hasRatings">
+      <div class="fixed-top pt-2">
 
-      <Chart
-        :chartData="chartData"
-        :regions="regions"
-      ></Chart>
+        <Chart
+          :chartData="chartData"
+          :regions="regions"
+        ></Chart>
+
+      </div>
+
+      <div
+        class="container"
+        style="margin-top: 262px"
+      >
+        <Things @setRegions="setRegions"></Things>
+      </div>
 
     </div>
 
-    <div
-      class="container"
-      style="margin-top: 262px"
+    <transition
+      name="fade"
     >
-      <Things @setRegions="setRegions"></Things>
-    </div>
+      <div v-if="status == 'success' && !hasRatings" class="container flex h-100">
+        <div class="px-2">
+          <h3>Hello!</h3>
+          <h5>Click the green circle below to start tracking stuff.</h5>
+        </div>
+      </div>
+    </transition>
 
   </div>
 </template>
@@ -44,13 +58,18 @@ export default {
   },
 
   computed: {
-    ...mapState("ratings", {
-      ratings: "all"
+    ...mapState('ratings', {
+      ratings: 'all',
+      status: 'status'
     }),
+
+    hasRatings() {
+      return this.$store.getters['ratings/hasRatings']();
+    },
 
     chartData() {
       let data = {
-        type: "spline",
+        type: 'spline',
         xs: {},
         columns: []
       };

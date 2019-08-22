@@ -22,6 +22,10 @@
                 <h6 class="mt-5">You can track more things later by coming to this page and clicking the plus in the green circle below.</h6>
             </div>
         </div>
+        <div class="add-text text-center" v-if="Object.keys(all).length == 1">
+            Add more trackers here<br>
+            <span class="oi oi-arrow-bottom vert-move"></span>
+        </div>
     </div>
 </template>
 
@@ -33,9 +37,7 @@ import { mapState } from 'vuex';
 export default {
 
     computed: {
-
         ...mapState('ratings', ['all']),
-
     },
 
     methods: {
@@ -45,8 +47,6 @@ export default {
             }
         }
     }
-
-
 
 }
 

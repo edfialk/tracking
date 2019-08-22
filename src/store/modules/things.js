@@ -39,9 +39,15 @@ const actions = {
                 commit('error', null);
 
                 let all = {};
-                let resp = await firebase.firestore().collection('factors').doc(rootState.user.uid).get();
+                let doc = firebase.firestore().collection('factors').doc(rootState.user.uid);
+                let resp = doc.get();
 
-                if (resp.exists) {
+                if (!resp.exists) {
+
+                    await doc.set({});
+
+                } else {
+
                     all = resp.data();
                     //convert firebase timestamps to date
                     for (let thing in all) {
@@ -59,6 +65,7 @@ const actions = {
                             all[thing].since = all[thing].since.toDate();
                         }
                     }
+
                 }
 
                 commit('set', all);

@@ -135,6 +135,14 @@ select.transparent {
   }
 }
 
+.add-text {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: 71px;
+  width: 80%;
+}
+
 .block {
   @extend .border, .rounded, , .pl-3, .pr-2, .py-2, .my-2;
   a {
@@ -225,4 +233,20 @@ button.active {
 .slide-right-enter {
   opacity: 0;
   transform: translate(-50%, 0);
+}
+
+.fade-enter-active, .fade-leave-active {
+  transition: opacity 1s;
+}
+.fade-enter, .fade-leave-to  {
+  opacity: 0;
+}
+
+.vert-move {
+  animation: vert 1s infinite alternate;
+}
+
+@keyframes vert {
+  0% { transform: translateY(0); }
+  100% { transform: translateY(10px); }
 }
