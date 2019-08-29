@@ -8,11 +8,18 @@ html {
   height: 100%;
 
 }
+
 body {
   display: flex;
   height: 100%;
   margin: 0;
   font-family: 'Roboto', sans-serif;
+}
+
+img, canvas {
+  max-width: 100%;
+  height: auto;
+  display: block;
 }
 
 .bg-block {

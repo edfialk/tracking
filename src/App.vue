@@ -31,6 +31,7 @@ export default {
     if (this.isLoggedIn) {
       this.$store.dispatch('things/get');
       this.$store.dispatch('ratings/get');
+      this.$store.dispatch('photos/get');
     }
 
     this.$router.beforeEach((to, from, next) => {

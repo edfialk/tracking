@@ -8,6 +8,7 @@ import firebaseConfig from '../firebase.config';
 import things from './modules/things';
 import trackers from './modules/trackers';
 import ratings from './modules/ratings';
+import photos from './modules/photos';
 
 
 firebase.initializeApp(firebaseConfig);
@@ -30,7 +31,8 @@ export default new Vuex.Store({
   modules: {
     things,
     ratings,
-    trackers
+    trackers,
+    photos
   },
   state,
   mutations: {
