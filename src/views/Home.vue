@@ -1,5 +1,5 @@
 <template>
-  <div class="h-100">
+  <div>
 
     <div v-if="status == 'success' && hasRatings">
       <div class="fixed-top pt-2">

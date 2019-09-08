@@ -1,29 +1,25 @@
 <template>
-    <div class="container d-flex h-100 p-3 mx-auto flex-column">
+    <div class="container">
 
       <!-- <h1 class="cover-heading">Hi Lerb.</h1> -->
 
-      <div class="flex-grow-1 d-flex align-items-center">
-        <form @submit.prevent="login">
-          <div class="form-group">
-            <label for="email">Email address</label>
-            <input type="email" class="form-control" id="email" v-model="email" required>
-          </div>
-          <div class="form-group">
-            <label for="password">Password</label>
-            <input type="password" class="form-control" id="password" v-model="password" required @keyup="error = ''">
-          </div>
-          <div class="form-group">
-            <button type="submit" class="btn btn-lg btn-success">Sign In</button>
-          </div>
-        </form>
+      <form @submit.prevent="login" class="mt-5">
+        <div class="form-group">
+          <label for="email">Email address</label>
+          <input type="email" class="form-control" id="email" v-model="email" required>
+        </div>
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input type="password" class="form-control" id="password" v-model="password" required @keyup="error = ''">
+        </div>
+        <div class="form-group">
+          <button type="submit" class="btn btn-lg btn-success">Sign In</button>
+        </div>
+      </form>
+      <div class="bg-danger text-light p-3" v-if="error">
+        {{ error }}
       </div>
 
-      <footer class="bg-danger" v-if="error">
-        <div class="inner text-light p-3">
-          {{ error }}
-        </div>
-      </footer>
 
     </div>
 </template>

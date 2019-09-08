@@ -9,21 +9,21 @@ const state = {
 };
 
 const getters = {
-    active: state => {
-        let resp = [];
-        for (let thing in state.all) {
-            if (state.all[thing].since) resp.push(state.all[thing]);
-        }
-        return resp;
-    },
+    // active: state => {
+    //     let resp = [];
+    //     for (let thing in state.all) {
+    //         if (state.all[thing].since) resp.push(state.all[thing]);
+    //     }
+    //     return resp;
+    // },
 
-    inactive: state => {
-        let resp = [];
-        for (let thing in state.all) {
-            if (!state.all[thing].since) resp.push(state.all[thing]);
-        }
-        return resp;
-    },
+    // inactive: state => {
+    //     let resp = [];
+    //     for (let thing in state.all) {
+    //         if (!state.all[thing].since) resp.push(state.all[thing]);
+    //     }
+    //     return resp;
+    // },
 
     name: (state) => (name) => {
         return state.all ? state.all[name] : null;
@@ -44,7 +44,7 @@ const actions = {
 
                 if (!resp.exists) {
 
-                    await doc.set({});
+                    doc.set({});
 
                 } else {
 

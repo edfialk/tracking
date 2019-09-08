@@ -19,9 +19,9 @@ Vue.use(Vuex)
 const debug = process.env.NODE_ENV !== 'production'
 
 const state = {
-  user: false,
+  user: null,
   trackers: [],
-  things: [],
+  factors: [],
   status: '',
   error: ''
 };
@@ -58,6 +58,13 @@ export default new Vuex.Store({
       // if (payload) console.log('error', payload);
       state.error = payload;
     },
+    trackers(state, payload) {
+      state.trackers = payload;
+    },
+    factors(state, payload) {
+      state.factors = payload;
+    }
+
 
   },
   actions: {
@@ -88,7 +95,6 @@ export default new Vuex.Store({
 
         }
   
-
       });
     },
 
@@ -100,13 +106,37 @@ export default new Vuex.Store({
       commit('setUser', null);
       commit('status', 'success');
       commit('error', null);
-    }
+    },
+
+    get ({ commit, state }) {
+      return new Promise(async (resolve, reject) => {
+        commit('status', 'loading');
+
+        try {
+
+          const doc = await firebase.firestore().collection('users').doc(state.user.uid);
+          const resp = await doc.get();
+          let data = {};
+          if (resp.exists) {
+            data = resp.data();
+            commit('trackers', data.trackers);
+            commit('factors', data.factors);
+          }
+
+          commit('status', 'success');
+          resolve(data);
+        } catch (e) {
+          commit('error', e);
+          reject(e);
+        }
+      });
+    },
 
   },
 
   getters: {
     isLoggedIn: state => {
-      return state.user;
+      return state.user !== null;
     }
 
   }

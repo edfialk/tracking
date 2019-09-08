@@ -2,7 +2,8 @@
 
 @import '~bootstrap/scss/bootstrap';
 
-@import './lib/open-iconic/open-iconic-bootstrap.scss';
+$icon-font-path: '~open-iconic/font/fonts/';
+@import "~open-iconic/font/css/open-iconic-bootstrap.scss";
 
 html {
   height: 100%;

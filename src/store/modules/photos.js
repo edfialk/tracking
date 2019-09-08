@@ -38,10 +38,12 @@ const actions = {
                                 rating.date = rating.date.toDate()
                             }
                             return rating;
-                        });
+                        }).sort((a,b) => {
+                            return b.date - a.date;
+                        })
                     }
                 } else {
-                    await doc.set({});
+                    doc.set({});
                 }
 
                 commit('set', all);
@@ -86,7 +88,7 @@ const actions = {
                 if (state.all[tracker])
                     photos = state.all[tracker].slice();
 
-                photos.push({ id, date, url });
+                photos.unshift({ id, date, url });
 
                 let update = {};
                 update[tracker] = photos;
@@ -103,30 +105,6 @@ const actions = {
                 reject(e);
             }
 
-            // try {
-
-            //     let photo = { date, url };
-            //     let photos = [];
-            //     if (state.all[tracker])
-            //         photos = state.all[tracker].slice();
-                
-            //     photos.push(photo);
-                
-            //     let update = { id: now };
-            //     update[tracker] = photos;
-                
-            //     await firebase.firestore().collection('photos').doc(rootState.user.uid).update(update);
-                
-            //     commit('add', { tracker, photo });
-            //     commit('status', 'success');
-            //     resolve(update);
-            // } catch (e) {
-            //     //delete photo from storage
-            //     await ref.delete();
-
-            //     commit('error', e);
-            //     reject(e);
-            // }
         });
     },
 
@@ -139,7 +117,7 @@ const mutations = {
 
     add(state, { date, id, url, tracker }) {
         state.all[tracker] = state.all[tracker] || [];
-        state.all[tracker].push({ date, id, url });
+        state.all[tracker].unshift({ date, id, url });
     },
 
     status(state, payload) {

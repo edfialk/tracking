@@ -61,7 +61,7 @@ exports.onImageUpload = functions.storage.object().onFinalize(async (object) => 
   await spawn('convert', [tempLocalFile, '-auto-orient', tempLocalFile]);
   console.log('rotated image created at', tempLocalFile);
   
-  await bucket.upload(tempLocalFile, {
+  const fileresp = await bucket.upload(tempLocalFile, {
     destination: filePath,
     resumable: false,
     metadata: {
@@ -77,7 +77,7 @@ exports.onImageUpload = functions.storage.object().onFinalize(async (object) => 
   await spawn('convert', [tempLocalFile, '-thumbnail', `${THUMB_MAX_WIDTH}x${THUMB_MAX_HEIGHT}>`, tempLocalThumbFile], {capture: ['stdout', 'stderr']});
   console.log('thumbnail created at', tempLocalThumbFile);
 
-  let thumbresp = await bucket.upload(tempLocalThumbFile, {
+  const thumbresp = await bucket.upload(tempLocalThumbFile, {
     destination: thumbFilePath,
     metadata: metadata,
     resumable: false
@@ -91,11 +91,18 @@ exports.onImageUpload = functions.storage.object().onFinalize(async (object) => 
   fs.unlinkSync(tempLocalThumbFile);
   console.log('Deleted local file', tempLocalThumbFile);
 
-  const remoteThumbFile = thumbresp[0];
-  const thumburlResp = await remoteThumbFile.getSignedUrl({
+  const urlOpts = {
     action: 'read',
     expires: '12-31-2050'
-  });
+  };
+  const remoteFile = fileresp[0];
+  const fileUrlResp = await remoteFile.getSignedUrl(urlOpts)
+  const fileUrl = fileUrlResp[0];
+
+  console.log('got new url: ', fileUrl);
+
+  const remoteThumbFile = thumbresp[0];
+  const thumburlResp = await remoteThumbFile.getSignedUrl(urlOpts);
   const thumbUrl = thumburlResp[0];
   
   console.log('got thumbnail url: ', thumbUrl);
@@ -104,21 +111,21 @@ exports.onImageUpload = functions.storage.object().onFinalize(async (object) => 
   const doc = await ref.get();
   const photos = doc.data();
   const trackerPhotos = photos[tracker];
-  console.log('this trackers photos: ', trackerPhotos);
-  for (let i = 0; i < trackerPhotos.length; i++){
-    if (trackerPhotos[i].id === id){
-      console.log('found photo entry');
-      trackerPhotos[i].thumbUrl = thumbUrl;
-      break;
-    }
+  const photo = trackerPhotos.find(e => e.id === id);
+
+  if (photo) {
+    let update = {};
+    update[tracker] = Firestore.FieldValue.arrayRemove(photo);
+    await ref.update(update);
+
+    photo.url = fileUrl;
+    photo.thumbUrl = thumbUrl;
+    update[tracker] = Firestore.FieldValue.arrayUnion(photo);
+    await ref.update(update);
+    console.log('added thumburl to firestore');
+  } else {
+    console.log('photo entry not found for id', id);
   }
-
-  let update = {};
-  update[tracker] = trackerPhotos;
-  console.log('update', update);
-
-  await ref.update(update);
-  console.log('added thumburl to firestore');
 
   return true;
 
