@@ -229,9 +229,6 @@ export default {
 
   watch: {
     regions(val) {
-      // this.setRegions(val);
-      // this.zoom();
-      // this.chart.regions(val);
       let { regions, lines } = this.setRegions(val);
       this.chart.regions(regions);
       this.chart.xgrids(lines);

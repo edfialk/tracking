@@ -9,22 +9,6 @@ const state = {
 };
 
 const getters = {
-    // active: state => {
-    //     let resp = [];
-    //     for (let thing in state.all) {
-    //         if (state.all[thing].since) resp.push(state.all[thing]);
-    //     }
-    //     return resp;
-    // },
-
-    // inactive: state => {
-    //     let resp = [];
-    //     for (let thing in state.all) {
-    //         if (!state.all[thing].since) resp.push(state.all[thing]);
-    //     }
-    //     return resp;
-    // },
-
     name: (state) => (name) => {
         return state.all ? state.all[name] : null;
     }
@@ -40,7 +24,7 @@ const actions = {
 
                 let all = {};
                 let doc = firebase.firestore().collection('factors').doc(rootState.user.uid);
-                let resp = doc.get();
+                let resp = await doc.get();
 
                 if (!resp.exists) {
 
@@ -109,13 +93,13 @@ const actions = {
         });
     },
 
-    delete ({ commit, rootState}, thing) {
+    delete ({ commit, rootState}, name) {
         return new Promise(async (resolve, reject) => {
             try {
-                let update = {};
-                update[thing.name] = firebase.firestore.FieldValue.delete();
+                const update = {};
+                update[name] = firebase.firestore.FieldValue.delete();
                 await firebase.firestore().collection('factors').doc(rootState.user.uid).update(update);
-                commit('delete', thing);
+                commit('delete', name);
                 resolve();
             } catch (e) {
                 commit('error', e);
@@ -123,6 +107,7 @@ const actions = {
             }
         });
     },
+
 };
 
 const mutations = {
@@ -139,7 +124,7 @@ const mutations = {
     },
 
     delete(state, payload) {
-        Vue.delete(state.all, payload.name);
+        Vue.delete(state.all, payload);
     },
     
     status(state, payload) {
@@ -147,18 +132,30 @@ const mutations = {
     },
 
     error(state, payload) {
+        if (payload) console.error(payload);
         state.error = payload;
     },
 
-    setDate(state, { name, dates }) {
+    setDates(state, { name, dates }) {
         state.all[name].dates = dates;
     },
 
-    setName(state, { thing, name }) {
-        Vue.delete(state.all, thing.name);
-        Vue.set(state.all, name, thing);
-        // state.all[name] = thing;
+    useOnce(state, { name, date }) {
+        state.all[name].dates.push({ date });
+    },
+
+    useOngoing(state, { name, date }) {
+        state.all[name].since = date;
+    },
+
+    stop(state, { name, date }) {
+        state.all[name].dates.push({
+            start: state.all[name].since,
+            end: date
+        });
+        state.all[name].since = null;
     }
+
 };
 
 export default {

@@ -67,7 +67,7 @@
       </div>
 
       <div
-        class="form-group"
+        class="form-group vdatetime-header__show"
         v-if="isSingleUse"
       >
         <label>When did you do it?</label>

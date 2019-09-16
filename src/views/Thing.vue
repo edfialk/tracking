@@ -11,31 +11,34 @@
         </h5>
       </div>
 
-      <div class="mb-3">
+      <div class="mb-3 datetime-header__show" ref="stopDatetime">
         <button
           v-if="!thing.since"
           type="btn"
           class="btn btn-info btn-block shadow"
           data-toggle="modal"
           data-target="#modal-start"
-        >Use {{ thing.name }} now</button>
+        >Use {{ thing.name }}</button>
         <button
           v-if="thing.since"
           type="btn"
           class="btn btn-info btn-block"
           @mouseup="stop"
         >Stop using {{ thing.name }}</button>
+        <datetime
+          :bootstrap-styling="true"
+          input-class="d-none"
+          v-model="use.date"
+          value-zone="America/Los_Angeles"
+          format="DDDD"
+          title="When did you stop?"
+          @input="onStopDatePicked"
+        ></datetime>
       </div>
 
       <div class="mb-3 p-3 bg-light rounded shadow text-center">
         <Chart :chartData="chartData" :regions="chartRegions"></Chart>
       </div>
-
-      <!-- <DateTable
-        :dates="thing.dates"
-        @save="setDates"
-        v-if="thing.dates && thing.dates.length > 0"
-      ></DateTable> -->
 
       <div class="mb-3">
         <button
@@ -123,7 +126,7 @@
                 <span aria-hidden="true">&times;</span>
               </button>
             </div>
-            <div class="modal-body">
+            <div class="modal-body datetime-header__show" ref="startDatetime">
               <button
                 type="button"
                 class="btn btn-info btn-block mb-3"
@@ -134,6 +137,15 @@
                 class="btn btn-info btn-block"
                 @click="onClickUseOngoing"
               >Ongoing</button>
+              <datetime
+                :bootstrap-styling="true"
+                input-class="d-none"
+                v-model="use.date"
+                value-zone="America/Los_Angeles"
+                format="DDDD"
+                :title="use.status == 'choseOnce' ? 'When did you use it?' : 'When did you start?'"
+                @input="onStartDatePicked"
+              ></datetime>
             </div>
             <div class="modal-footer">
               <button
@@ -147,7 +159,7 @@
       </div>
     </div>
 
-    <div class="p-3 bg-light rounded shadow" v-if="loadStatus=='success' && !thing">
+    <div class="p-3 bg-light rounded shadow h-100" v-if="loadStatus=='success' && !thing">
       You don't have anything with that name. There might be a problem.
       <a href="#" @click.prevent="$router.go(-1)">
         You should go back.
@@ -160,34 +172,28 @@
 
 <script>
 import { mapState, mapGetters } from 'vuex';
-import DateTable from '../components/DateTable';
+// import DateTable from '../components/DateTable';
 import jQuery from 'jquery';
 let $ = jQuery;
 import Chart from '../components/Chart';
 
 export default {
 
-  components: { DateTable, Chart },
+  components: { Chart },
 
   data() {
     return {
-      // thing: null,
       showModal: false,
       inputName: '',
       isNameTaken: false,
       notFound: false,
+      use: {
+        once: false,
+        date: null,
+        status: 'choosing'
+      }
     };
   },
-
-  // beforeMount() {
-  //   this.thing = {...this.$store.getters['things/name'](this.$route.params.id)};
-
-  //   this.$store.watch(
-  //     (state, getters) => getters['things/name'](this.$route.params.id), 
-  //     thing => this.thing = { ...thing }
-  //   );
-
-  // },
 
   computed: {
 
@@ -243,7 +249,6 @@ export default {
 
       let dates = {};
       let ratings = {};
-      
 
       for (let tracker in this.ratings) {
         dates[tracker] = dates[tracker] || [];
@@ -275,13 +280,11 @@ export default {
 
   methods: {
 
-    async save(forward = true) {
+    async save() {
       try {
         this.loading = true;
         await this.$store.dispatch('things/save', this.thing);
         this.loading = false;
-        if (forward)
-          this.$router.push('/kitty');
       } catch (e) {
         this.loading = false;
         this.error = e;
@@ -291,18 +294,13 @@ export default {
     async delete() {
       try {
         this.loading = true;
-        await this.$store.dispatch('things/delete', this.thing);
+        await this.$store.dispatch('things/delete', this.thing.name);
         this.loading = false;
         this.$router.push("/");
       } catch (e) {
         this.loading = false;
         this.error = e;
       }
-    },
-
-    setDates(dates) {
-      this.$store.commit('things/setDate', { name: this.thing.name, dates });
-      this.save(false);
     },
 
     onClickDelete() {
@@ -324,39 +322,58 @@ export default {
 
       if (this.inputName.length == 0) return;
 
-      let oldName = this.thing.name;
-      let thing = {...this.thing, name: newName };
+      const oldName = this.thing.name;
+      const thing = {...this.thing, name: newName };
 
       this.$store.dispatch('things/add', thing);
       this.$router.replace('/thing/' + newName);
-      this.$store.dispatch('things/delete', { name: oldName });
+      this.$store.dispatch('things/delete', oldName);
       this.inputName = "";
     },
 
     onClickUseOnce() {
-      $("#modal-start").modal("hide");
-      let date = new Date();
-      this.thing.dates.push({ date });
-      this.save(false);
+      this.use.once = true;
+      this.use.status = "choseOnce";
+      this.$refs.startDatetime.querySelector('input').click();
     },
 
     onClickUseOngoing() {
-      $("#modal-start").modal("hide");
-      this.$set(this.thing, 'since', new Date());
-      this.save(false);
+      this.use.once = false;
+      this.use.status = "choseOngoing";
+      this.$refs.startDatetime.querySelector('input').click();
+    },
+
+    onStartDatePicked() {
+      if (!this.use.date) return;
+      $('#modal-start').modal('hide');
+
+      const name = this.thing.name;
+      const date = new Date(this.use.date);
+
+      if (this.use.once) {
+        this.$store.commit('things/useOnce', { name, date });
+      } else {
+        this.$store.commit('things/useOngoing', { name, date });
+      }
+
+      this.save();
+      this.use.status = "choosing";
+      this.use.date = null;
     },
 
     stop() {
-      //need to wait before re-render or click gets fired on new button
-      window.setTimeout(() => {
-        this.thing.dates.push({
-          start: this.thing.since,
-          end: new Date()
-        });
-        this.thing.since = null;
-        this.save(false);
-      }, 10);
+      this.$refs.stopDatetime.querySelector('input').click();
     },
+
+    onStopDatePicked() {
+      if (!this.use.date) return;
+      const date = new Date(this.use.date);
+      this.$store.commit('things/stop', { name: this.thing.name, date });
+      this.save();
+      this.use.date = null;
+    }
+
+
   }
 };
 </script>

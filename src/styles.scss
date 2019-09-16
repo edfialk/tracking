@@ -7,7 +7,6 @@ $icon-font-path: '~open-iconic/font/fonts/';
 
 html {
   height: 100%;
-
 }
 
 body {
@@ -99,9 +98,13 @@ select.transparent {
 
 .nav {
   height: 53px;
-  @extend .h5;
-  @extend .fixed-bottom, .navbar-light, .bg-white;
-  @extend .border-top;
+  @extend .h5, .navbar-light, .bg-white, .border-top;
+  position: fixed;
+  right: 0;
+  left: 0;
+  bottom: 0;
+  z-index: 100;
+
   .nav--inner {
     @extend .d-flex, .justify-content-around, .align-items-center;
     position: relative;
@@ -172,16 +175,28 @@ button.active {
 }
 
 .things .color {
-  // width: 36px;
-  // height: 36px;
   opacity: 0.5;
-  // height: 40px;
   &.active {
     @extend .border, .rounded;
   }
 }
 
-
+.vdatetime-popup {
+  top: 40%;
+}
+.vdatetime-popup__header {
+  height: 0;
+  padding: 0;
+}
+.vdatetime-popup__actions {
+  padding: 0 20px 5px 30px;
+}
+.vdatetime-header__show .vdatetime-popup__header {
+  top: 45%;
+  height: auto;
+  font-size: 18px;
+  padding: 10px 30px;
+}
 
 .c3-region {
   fill-opacity: 0.5 !important;

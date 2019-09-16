@@ -1,4 +1,5 @@
 import 'bootstrap';
+import 'vue-datetime/dist/vue-datetime.css';
 import '@/styles.scss';
 
 import Vue from 'vue';
@@ -11,10 +12,11 @@ import * as firebase from 'firebase/app';
 import 'firebase/auth';
 
 import { Datetime } from 'vue-datetime';
-import 'vue-datetime/dist/vue-datetime.css';
 import 'd3';
 import 'c3/c3.min.css';
 import moment from 'moment';
+
+// import 'lib/nanogallery/jquery.nanogallery2.core.min';
 
 Vue.use(Datetime);
 Vue.component('datetime', Datetime);

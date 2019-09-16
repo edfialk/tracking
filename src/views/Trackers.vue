@@ -7,14 +7,14 @@
                     <th class="text-center">Delete</th>
                 </tr>
             </thead>
-            <tbody class="bg-white">
-                <tr v-for="(tracker, name) in all" :key="name">
+            <transition-group tag="tbody" class="bg-white" name="slide-right">
+                <tr v-for="(tracker, name) in all" :key="name+''">
                     <td>{{ name }}</td>
                     <td class="text-center text-danger">
                         <span class="oi oi-x" @click="del(name)"></span>
                     </td>
                 </tr>
-            </tbody>
+            </transition-group>
         </table>
         <div v-else class="flex h-100 p-4">
             <div>
