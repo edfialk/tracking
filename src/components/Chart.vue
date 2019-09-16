@@ -68,7 +68,7 @@ export default {
         },
         data: {},
         point: {
-          show: true
+          show: false
         },
         axis: {
           x: {
