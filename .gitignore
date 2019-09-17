@@ -3,6 +3,7 @@ node_modules
 /dist
 /seed/service-key.json
 notes.txt
+/src/firebase.config.js
 
 # local env files
 .env.local
