@@ -1,29 +1,33 @@
-# lerb
+<h3 align="center">Tracker</h3>
+<br>
+<p align="center"><img src="https://user-images.githubusercontent.com/8652384/65061496-e4b06800-d92e-11e9-851a-290702722171.png"></p>
+<p align="center">A webapp for visualizing effects.</p>
+<p align="center">Built with Vue and Firebase.</p>
 
-## Project setup
+## Preview
 ```
+git clone
 npm install
 ```
 
-### Compiles and hot-reloads for development
+Create project in firebase console.
+
+Copy firebase config to /src/firebase.config.js
+
+example firebase.config.js:
+```
+export default {
+    apiKey: "{{ API KEY }}",
+    authDomain: "{{ PROJECT }}.firebaseapp.com",
+    databaseURL: "https://{{ PROJECT }}.firebaseio.com",
+    projectId: "{{ PROJECT }}",
+    storageBucket: "{{ PROJECT }}.appspot.com",
+    messagingSenderId: "{{ COPY THIS... }}",
+    appId: "{{ ...FROM FIREBASE }}"
+};
+```
 ```
 npm run serve
 ```
 
-### Compiles and minifies for production
-```
-npm run build
-```
-
-### Run your tests
-```
-npm run test
-```
-
-### Lints and fixes files
-```
-npm run lint
-```
-
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).
+visit localhost:8080
